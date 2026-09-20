@@ -1,3 +1,5 @@
+const Review = require("../models/reviewsModel");
+
 // @desc Create a new review
 // @route POST /api/reviews
 // @access User
@@ -17,7 +19,7 @@ const createReview = async (req, res, next) => {
       return res.status(400).json({ message: "Comment is required" });
     }
 
-    const review = new Review.create(req.body);
+    const review = await Review.create(req.body);
     res.status(201).json({ message: "Review created successfully", review });
   } catch (error) {
     console.error(error);
@@ -49,4 +51,10 @@ const getReviewsByUserId = async (req, res, next) => {
     console.error(error);
     res.status(500).json({ message: "Error fetching reviews" });
   }
+};
+
+module.exports = {
+  createReview,
+  getReviewsByProductId,
+  getReviewsByUserId,
 };

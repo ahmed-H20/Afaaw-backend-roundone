@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const productRouter = express.Router();
 
 const {
     createProduct,
@@ -9,10 +9,10 @@ const {
     deleteProduct,
 } = require("../services/productService");
 
-router.post("/", createProduct);
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+productRouter.post("/", createProduct);
+productRouter.get("/", getAllProducts);
+productRouter.get("/:id", getProductById);
+productRouter.put("/:id", updateProduct);
+productRouter.delete("/:id", deleteProduct);
 
-module.exports = router;
+module.exports = productRouter;
