@@ -1,4 +1,4 @@
-const Product = require("../models/productsModel");
+const productController = require("../controllers/productController");
 
 // @desc Create a new product
 // @route POST /api/products
@@ -6,7 +6,7 @@ const Product = require("../models/productsModel");
 const createProduct = async (req, res, next) => {
   try {
     console.log(req.body)
-    const product = await Product.create(req.body);
+    const product = await productController.create(req.body);
     res.status(201).json({ message: "Product created successfully", product });
   } catch (error) {
     console.error(error);
@@ -19,7 +19,7 @@ const createProduct = async (req, res, next) => {
 // @access Public
 const getAllProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const products = await productController.findAll();
     res.status(200).json({ products });
   } catch (error) {
     console.error(error);
@@ -32,7 +32,7 @@ const getAllProducts = async (req, res, next) => {
 // @access Public
 const getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await productController.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -48,9 +48,7 @@ const getProductById = async (req, res, next) => {
 // @access Admin
 const updateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const product = await productController.updateById(req.params.id, req.body);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -66,7 +64,7 @@ const updateProduct = async (req, res, next) => {
 // @access Admin
 const deleteProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await productController.deleteById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
