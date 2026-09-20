@@ -1,18 +1,19 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const productItemsSchema = new mongoose.Schema(
-  {
-    quantity: Number,
-    color: String,
-    size: String,
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-    },
-  },
-  {
-    timestamps: true,
-  },
+	{
+		quantity: Number,
+		color: String,
+		size: String,
+		productId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Product',
+		},
+	},
+	{
+		timestamps: true,
+	},
 );
 
-export const ProductItems = mongoose.model("ProductItems", productItemsSchema);
+const ProductItems = mongoose.model('ProductItems', productItemsSchema);
+module.exports = ProductItems;
