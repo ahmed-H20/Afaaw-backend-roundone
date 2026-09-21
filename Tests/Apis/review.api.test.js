@@ -1,53 +1,14 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
-const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const Review = require("../../models/review.model");
 const User = require("../../models/user.model");
 const Product = require("../../models/product.model");
 const Category = require("../../models/category.model");
-const app = require("../../app");
-
-jest.setTimeout(60000);
-
-let mongoServer;
-let server;
-let baseURL;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
 afterEach(async () => {
   await Review.deleteMany({});
   await Product.deleteMany({});
   await Category.deleteMany({});
   await User.deleteMany({});
-});
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
-
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  }
 });
 
 describe("Review API", () => {
@@ -119,9 +80,7 @@ describe("Review API", () => {
         comment: "Good product",
       });
 
-      const response = await axios.get(
-        `${baseURL}/api/reviews/${review._id}`
-      );
+      const response = await axios.get(`${baseURL}/api/reviews/${review._id}`);
 
       expect(response.status).toBe(200);
       expect(response.data.review).toBeDefined();
@@ -140,13 +99,10 @@ describe("Review API", () => {
         comment: "Good product",
       });
 
-      const response = await axios.put(
-        `${baseURL}/api/reviews/${review._id}`,
-        {
-          rating: 5,
-          comment: "Excellent product",
-        }
-      );
+      const response = await axios.put(`${baseURL}/api/reviews/${review._id}`, {
+        rating: 5,
+        comment: "Excellent product",
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.review).toBeDefined();
@@ -165,7 +121,7 @@ describe("Review API", () => {
       });
 
       const response = await axios.delete(
-        `${baseURL}/api/reviews/${review._id}`
+        `${baseURL}/api/reviews/${review._id}`,
       );
 
       expect(response.status).toBe(200);

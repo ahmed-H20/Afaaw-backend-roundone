@@ -1,49 +1,10 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
-const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const Order = require("../../models/order.model");
 const User = require("../../models/user.model");
-const app = require("../../app");
-
-jest.setTimeout(60000);
-
-let mongoServer;
-let server;
-let baseURL;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
 afterEach(async () => {
   await Order.deleteMany({});
   await User.deleteMany({});
-});
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
-
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  }
 });
 
 describe("Order API", () => {
@@ -91,9 +52,7 @@ describe("Order API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(
-        `${baseURL}/api/orders/${order._id}`
-      );
+      const response = await axios.get(`${baseURL}/api/orders/${order._id}`);
 
       expect(response.status).toBe(200);
       expect(response.data.order).toBeDefined();
@@ -108,12 +67,9 @@ describe("Order API", () => {
         userId: user._id,
       });
 
-      const response = await axios.put(
-        `${baseURL}/api/orders/${order._id}`,
-        {
-          status: "confirmed",
-        }
-      );
+      const response = await axios.put(`${baseURL}/api/orders/${order._id}`, {
+        status: "confirmed",
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.order).toBeDefined();
@@ -127,9 +83,7 @@ describe("Order API", () => {
         userId: user._id,
       });
 
-      const response = await axios.delete(
-        `${baseURL}/api/orders/${order._id}`
-      );
+      const response = await axios.delete(`${baseURL}/api/orders/${order._id}`);
 
       expect(response.status).toBe(200);
 

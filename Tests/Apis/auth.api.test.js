@@ -1,48 +1,9 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
 const dotenv = require("dotenv");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-
-dotenv.config();
 
 const User = require("../../models/user.model");
-const app = require("../../app");
-
-let mongoServer;
-let server;
-let baseURL;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
 afterEach(async () => {
   await User.deleteMany({});
-});
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
-
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  }
 });
 
 describe("Auth API", () => {
@@ -89,9 +50,7 @@ describe("Auth API", () => {
         });
       } catch (error) {
         expect(error.response.status).toBe(409);
-        expect(error.response.data.message).toBe(
-          "Email is already registered"
-        );
+        expect(error.response.data.message).toBe("Email is already registered");
       }
     });
   });
@@ -135,9 +94,7 @@ describe("Auth API", () => {
         });
       } catch (error) {
         expect(error.response.status).toBe(401);
-        expect(error.response.data.message).toBe(
-          "Invalid email or password"
-        );
+        expect(error.response.data.message).toBe("Invalid email or password");
       }
     });
 
@@ -149,9 +106,7 @@ describe("Auth API", () => {
         });
       } catch (error) {
         expect(error.response.status).toBe(401);
-        expect(error.response.data.message).toBe(
-          "Invalid email or password"
-        );
+        expect(error.response.data.message).toBe("Invalid email or password");
       }
     });
   });

@@ -1,47 +1,10 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
-const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const Cart = require("../../models/cart.model");
 const User = require("../../models/user.model");
-const app = require("../../app");
-
-let mongoServer;
-let server;
-let baseURL;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
 afterEach(async () => {
   await Cart.deleteMany({});
   await User.deleteMany({});
-});
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
-
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  }
 });
 
 describe("Cart API", () => {
@@ -88,9 +51,7 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(
-        `${baseURL}/api/carts/${cart._id}`
-      );
+      const response = await axios.get(`${baseURL}/api/carts/${cart._id}`);
 
       expect(response.status).toBe(200);
       expect(response.data.cart).toBeDefined();
@@ -105,12 +66,9 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.put(
-        `${baseURL}/api/carts/${cart._id}`,
-        {
-          userId: user._id,
-        }
-      );
+      const response = await axios.put(`${baseURL}/api/carts/${cart._id}`, {
+        userId: user._id,
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.cart).toBeDefined();
@@ -124,9 +82,7 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.delete(
-        `${baseURL}/api/carts/${cart._id}`
-      );
+      const response = await axios.delete(`${baseURL}/api/carts/${cart._id}`);
 
       expect(response.status).toBe(200);
 

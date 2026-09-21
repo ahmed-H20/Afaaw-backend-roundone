@@ -1,45 +1,8 @@
-const mongoose = require("mongoose");
 const axios = require("axios");
-const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const Category = require("../../models/category.model");
-const app = require("../../app");
-
-let mongoServer;
-let server;
-let baseURL;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const mongoUri = mongoServer.getUri();
-
-  await mongoose.connect(mongoUri);
-
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
 afterEach(async () => {
   await Category.deleteMany({});
-});
-
-afterAll(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-  }
-
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(resolve);
-    });
-  }
 });
 
 describe("Category API", () => {
@@ -82,7 +45,7 @@ describe("Category API", () => {
       });
 
       const response = await axios.get(
-        `${baseURL}/api/categories/${category._id}`
+        `${baseURL}/api/categories/${category._id}`,
       );
 
       expect(response.status).toBe(200);
@@ -102,7 +65,7 @@ describe("Category API", () => {
         `${baseURL}/api/categories/${category._id}`,
         {
           name: "Updated Electronics",
-        }
+        },
       );
 
       expect(response.status).toBe(200);
@@ -118,7 +81,7 @@ describe("Category API", () => {
       });
 
       const response = await axios.delete(
-        `${baseURL}/api/categories/${category._id}`
+        `${baseURL}/api/categories/${category._id}`,
       );
 
       expect(response.status).toBe(200);
