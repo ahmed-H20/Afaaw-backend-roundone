@@ -24,7 +24,7 @@ const getReviewsByProductId = async (productId) => {
 
 const updateReview = async (id, data) => {
   return await Review.findByIdAndUpdate(id, data, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   })
     .populate("userId", "-password")

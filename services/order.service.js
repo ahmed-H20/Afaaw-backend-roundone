@@ -18,7 +18,7 @@ const getOrdersByUserId = async (userId) => {
 
 const updateOrder = async (id, data) => {
   return await Order.findByIdAndUpdate(id, data, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   }).populate("userId", "-password");
 };

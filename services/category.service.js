@@ -14,7 +14,7 @@ const getCategoryById = async (id) => {
 
 const updateCategory = async (id, updateData) => {
   return await Category.findByIdAndUpdate(id, updateData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 };

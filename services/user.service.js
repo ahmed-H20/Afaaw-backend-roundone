@@ -11,7 +11,7 @@ const createUser = async (data) => {
 };
 
 const getAllUsers = async () => {
-  return await User.find();
+  return await User.find().select("-password");
 };
 
 const getUserById = async (id) => {
@@ -26,7 +26,7 @@ const updateUser = async (id, data) => {
   }
 
   return await User.findByIdAndUpdate(id, updateData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   }).select("-password");
 };

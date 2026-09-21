@@ -18,7 +18,7 @@ const getCartByUserId = async (userId) => {
 
 const updateCart = async (id, data) => {
   return await Cart.findByIdAndUpdate(id, data, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   }).populate("userId", "-password");
 };
