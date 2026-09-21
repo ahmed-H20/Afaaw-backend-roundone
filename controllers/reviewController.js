@@ -16,7 +16,7 @@ const createReview = async (req, res) => {
 };
 
 // @desc Get all reviews for a product
-// @route GET /api/reviews/product/:productId
+// @route GET /api/reviews/:productId
 // @access Public
 const getReviewsByProductId = async (req, res) => {
   try {
