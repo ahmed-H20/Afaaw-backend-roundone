@@ -1,3 +1,5 @@
+const Review = require("../models/reviewsModel");
+
 // @desc Create a new review
 // @route POST /api/reviews
 // @access User
@@ -7,17 +9,16 @@ const createReview = async (req, res, next) => {
       return res.status(400).json({ message: "Review data is required" });
     }
 
-    if (req.body.rating < 1 || req.body.rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be between 1 and 5" });
+    const { rating, comment } = req.body;
+    if (rating == null || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
     }
 
-    if (!req.body.comment) {
+    if (!comment) {
       return res.status(400).json({ message: "Comment is required" });
     }
 
-    const review = new Review.create(req.body);
+    const review = await Review.create(req.body);
     res.status(201).json({ message: "Review created successfully", review });
   } catch (error) {
     console.error(error);
@@ -26,7 +27,7 @@ const createReview = async (req, res, next) => {
 };
 
 // @desc Get all reviews for a product
-// @route GET /api/reviews/:productId
+// @route GET /api/reviews/product/:productId
 // @access Public
 const getReviewsByProductId = async (req, res, next) => {
   try {
@@ -50,3 +51,5 @@ const getReviewsByUserId = async (req, res, next) => {
     res.status(500).json({ message: "Error fetching reviews" });
   }
 };
+
+module.exports = { createReview, getReviewsByProductId, getReviewsByUserId };

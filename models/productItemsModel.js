@@ -9,6 +9,13 @@ const productItemsSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
     },
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+    },
+    price: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

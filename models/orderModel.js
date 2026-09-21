@@ -7,6 +7,9 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    date: {
+      type: Date,
+    },
     status: {
       type: String,
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
