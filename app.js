@@ -6,6 +6,7 @@ const userRoute = require("./routes/user.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
 const reviewRoute = require("./routes/review.route");
+const authRoute = require("./routes/auth.route");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
     res.send("Hello, World!");
 });
 
+app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/users", userRoute);

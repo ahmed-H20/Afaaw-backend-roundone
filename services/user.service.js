@@ -1,7 +1,13 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 
 const createUser = async (data) => {
-  return await User.create(data);
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  return await User.create({
+    ...data,
+    password: hashedPassword,
+  });
 };
 
 const getAllUsers = async () => {
@@ -13,7 +19,13 @@ const getUserById = async (id) => {
 };
 
 const updateUser = async (id, data) => {
-  return await User.findByIdAndUpdate(id, data, {
+  const updateData = { ...data };
+
+  if (updateData.password) {
+    updateData.password = await bcrypt.hash(updateData.password, 10);
+  }
+
+  return await User.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true,
   }).select("-password");
@@ -21,12 +33,22 @@ const updateUser = async (id, data) => {
 
 const deleteUser = async (id) => {
   return await User.findByIdAndDelete(id);
-}
+};
+
+const getUserByEmail = async (email) => {
+  return await User.findOne({ email });
+};
+
+const comparePassword = async (password, hashedPassword) => {
+  return await bcrypt.compare(password, hashedPassword);
+};
 
 module.exports = {
-    createUser,
-    getAllUsers,
-    getUserById,
-    updateUser,
-    deleteUser,
+  createUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  getUserByEmail,
+  comparePassword,
 };
