@@ -1,7 +1,7 @@
 const userService = require("../services/userService");
 // @desc Create a new user
 // @route POST /api/user
-// @access Admin
+// @access Public
 const createUser = async (req, res) => {
   try {
     const user = await userService.createUser(req.body);
@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
 
 // @desc Get all users
 // @route GET /api/user
-// @access Public
+// @access Admin
 const getAllUsers = async (req, res) => {
   try {
     const users = await userService.getAllUsers();
@@ -31,7 +31,7 @@ const getAllUsers = async (req, res) => {
 
 // @desc Get a user by ID
 // @route GET /api/user/:id
-// @access Public
+// @access Admin
 const getUserById = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
@@ -46,7 +46,7 @@ const getUserById = async (req, res) => {
 
 // @desc Update a user
 // @route PUT /api/user/:id
-// @access Admin
+// @access User,Admin
 const updateUser = async (req, res) => {
   try {
     const user = await userService.updateUser(req.params.id, req.body);
