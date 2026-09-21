@@ -5,7 +5,7 @@ const Product = require("../models/productsModel");
 // @access Admin
 const createProduct = async (req, res, next) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const product = await Product.create(req.body);
     res.status(201).json({ message: "Product created successfully", product });
   } catch (error) {
