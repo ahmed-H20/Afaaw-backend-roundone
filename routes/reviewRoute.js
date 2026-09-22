@@ -4,11 +4,16 @@ const {
   getReviewsByProductId,
   getReviewsByUserId,
 } = require("../services/reviewService");
+const {
+  createReviewValidator,
+  getReviewsByProductValidator,
+  getReviewsByUserValidator,
+} = require("../utils/validators/reviews.validator");
 
 const router = express.Router();
 
-router.post("/", createReview);
-router.get("/product/:productId", getReviewsByProductId);
-router.get("/user/:userId", getReviewsByUserId);
+router.post("/", createReviewValidator, createReview);
+router.get("/product/:productId", getReviewsByProductValidator, getReviewsByProductId);
+router.get("/user/:userId", getReviewsByUserValidator, getReviewsByUserId);
 
 module.exports = router;

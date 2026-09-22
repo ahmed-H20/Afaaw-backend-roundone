@@ -1,18 +1,27 @@
 const express = require("express");
 const {
   getAllCarts,
-  getOneCartByLoggedUser,
+  getOneCartByUser,
+  getCartItems,
   addProduct,
   removeProduct,
   changeProductQuantity,
 } = require("../services/cartService");
+const {
+  getCartValidator,
+  getCartItemsValidator,
+  addProductValidator,
+  changeProductQuantityValidator,
+  removeProductValidator,
+} = require("../utils/validators/cart.validator");
 
 const router = express.Router();
 
 router.get("/", getAllCarts);
-router.get(":id", getOneCartByLoggedUser);
-router.post("/", addProduct);
-router.patch("/", changeProductQuantity);
-router.delete("/", removeProduct);
+router.get("/cart/:userId", getCartValidator, getOneCartByUser);
+router.get("/cartItems/:cartId", getCartItemsValidator, getCartItems);
+router.post("/", addProductValidator, addProduct);
+router.patch("/", changeProductQuantityValidator, changeProductQuantity);
+router.delete("/", removeProductValidator, removeProduct);
 
 module.exports = router;

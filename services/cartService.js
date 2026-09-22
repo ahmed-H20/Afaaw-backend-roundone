@@ -1,92 +1,61 @@
 const cartController = require("../controllers/cartController");
+const asyncHandler = require("express-async-handler");
+const ApiError = require("../utils/ApiError");
 
-exports.getAllCarts = async (req, res) => {
-  try {
-    const carts = await cartController.findAll();
-    const cartsWithItems = await Promise.all(carts.map(cartController.getWithItems));
-    res.status(200).json(cartsWithItems);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.getAllCarts = asyncHandler(async (req, res) => {
+  const carts = await cartController.findAll();
+  res.status(200).json(carts);
+});
+
+exports.getCartItems = asyncHandler(async (req, res) => {
+  const cartItems = await cartController.findItems(req.params.cartId);
+  res.status(200).json(cartItems);
+});
+
+exports.getOneCartByUser = asyncHandler(async (req, res) => {
+  const cart = await cartController.findByUserId(req.params.userId);
+  if (!cart) {
+    throw new ApiError("Cart not found", 404);
   }
-};
+  res.status(200).json(await cartController.findItems(cart._id));
+});
 
-exports.getOneCartByLoggedUser = async (req, res) => {
-  try {
-    const cart = await cartController.findByUserId(req.params.id);
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
-    res.status(200).json(await cartController.getWithItems(cart));
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.addProduct = asyncHandler(async (req, res) => {
+  const { productId, quantity = 1, color, size } = req.body;
+
+  let cart = await cartController.findByUserId(req.user.id);
+  if (!cart) {
+    cart = await cartController.create({ userId: req.user.id });
   }
-};
 
-exports.addProduct = async (req, res) => {
-  try {
-    const { productId, quantity = 1, color, size } = req.body;
-    if (!productId || !Number.isInteger(quantity) || quantity < 1) {
-      return res.status(400).json({
-        message: "productId and a positive integer quantity are required",
-      });
-    }
+  const query = { cartId: cart._id, productId };
+  if (color) query.color = color;
+  if (size) query.size = size;
 
-    let cart = await cartController.findByUserId(req.user.id);
-    if (!cart) {
-      cart = await cartController.create({ userId: req.user.id });
-    }
+  const createCart = await cartController.upsertItem(query, quantity);
 
-    const query = { cartId: cart._id, productId };
-    if (color) query.color = color;
-    if (size) query.size = size;
+  res.status(200).json(createCart);
+});
 
-    await cartController.upsertItem(query, quantity);
+exports.removeProduct = asyncHandler(async (req, res) => {
+  const { productId, id } = req.body;
 
-    res.status(200).json(await cartController.getWithItems(cart));
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  const updatedCart = await cartController.deleteItem({
+    id,
+    productId,
+  });
+  if (!updatedCart) {
+    throw new ApiError("Product not found in cart", 404);
   }
-};
+  res.status(200).json(updatedCart);
+});
 
-exports.removeProduct = async (req, res) => {
-  try {
-    const { productId } = req.body;
-    const cart = await cartController.findByUserId(req.user.id);
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
-    const item = await cartController.deleteItem({
-      cartId: cart._id,
-      productId,
-    });
-    if (!item) {
-      return res.status(404).json({ message: "Product not found in cart" });
-    }
-    res.status(200).json(await cartController.getWithItems(cart));
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+exports.changeProductQuantity = asyncHandler(async (req, res) => {
+  const { productId, quantity, id } = req.body;
+
+  const updatedCart = await cartController.updateItem(id, productId, quantity);
+  if (!updatedCart) {
+    throw new ApiError("Product not found in cart", 404);
   }
-};
-
-exports.changeProductQuantity = async (req, res) => {
-  try {
-    const { productId, quantity } = req.body;
-    if (!productId || !Number.isInteger(quantity) || quantity < 1) {
-      return res.status(400).json({
-        message: "productId and a positive integer quantity are required",
-      });
-    }
-
-    const cart = await cartController.findByUserId(req.user.id);
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
-    const item = await cartController.updateItem({ cartId: cart._id, productId }, quantity);
-    if (!item) {
-      return res.status(404).json({ message: "Product not found in cart" });
-    }
-    res.status(200).json(await cartController.getWithItems(cart));
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  res.status(200).json(updatedCart);
+});
