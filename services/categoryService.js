@@ -1,6 +1,7 @@
 const AppError = require("../errors/appError");
 const Product = require("../models/productsModel");
-const categoryRepository = require("../repository/category.repository")
+const categoryRepository = require("../repository/category.repository");
+const isValidId = require("../utils/isValidId");
 
 // @descadd category
 // @route POST /api/category
