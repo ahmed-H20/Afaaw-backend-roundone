@@ -1,5 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const {
+    createReviewValidation,
+    productIdValidation,
+    userIdValidation,
+} = require("../utils/validators/reviewValidator");
 
 const {
     createReview,
@@ -7,8 +13,6 @@ const {
     getReviewsByUserId,
 } = require("../controllers/reviewController");
 
-router.post("/", createReview);
-router.get("/product/:productId", getReviewsByProductId);
-router.get("/user/:userId", getReviewsByUserId);
-
-module.exports = router;
+router.post("/", createReviewValidation, validate, createReview);
+router.get("/product/:productId", productIdValidation, validate, getReviewsByProductId);
+router.get("/user/:userId", userIdValidation, validate, getReviewsByUserId);

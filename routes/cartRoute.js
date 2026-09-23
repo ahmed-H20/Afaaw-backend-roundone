@@ -1,5 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const {
+    createCartValidation,
+    cartIdValidation,
+    cartItemIdValidation,
+    addItemToCartValidation,
+    updateCartItemValidation,
+} = require("../utils/validators/cartValidator");
 
 const {
     createCart,
@@ -9,10 +17,8 @@ const {
     updateItem,
 } = require("../controllers/cartController");
 
-router.post("/", createCart);
-router.post("/:cartId/items", addItemToCart);
-router.get("/user/:userId", getCartByUserId);
-router.delete("/items/:itemId", removeItem);
-router.put("/items/:itemId", updateItem);
-
-module.exports = router;
+router.post("/", createCartValidation, validate, createCart);
+router.post("/:cartId/items", cartIdValidation, addItemToCartValidation, validate, addItemToCart);
+router.get("/user/:userId", createCartValidation, validate, getCartByUserId);
+router.delete("/items/:itemId", cartItemIdValidation, validate, removeItem);
+router.put("/items/:itemId", cartItemIdValidation, updateCartItemValidation, validate, updateItem);
