@@ -1,4 +1,5 @@
 const express = require("express");
+
 const categoryRouter = express.Router();
 
 const {
@@ -9,10 +10,38 @@ const {
   deleteCategory,
 } = require("../services/categoryService");
 
-categoryRouter.post("/", createCategory);
+const validate = require("../middlewares/validation.middleware");
+
+const {
+  createCategorySchema,
+  categoryIdSchema,
+  updateCategorySchema,
+} = require("../validations/category.validation");
+
+categoryRouter.post(
+  "/",
+  validate(createCategorySchema),
+  createCategory
+);
+
 categoryRouter.get("/", getAllCategories);
-categoryRouter.get("/:id", getCategoryById);
-categoryRouter.put("/:id", updateCategory);
-categoryRouter.delete("/:id", deleteCategory);
+
+categoryRouter.get(
+  "/:id",
+  validate(categoryIdSchema),
+  getCategoryById
+);
+
+categoryRouter.put(
+  "/:id",
+  validate(updateCategorySchema),
+  updateCategory
+);
+
+categoryRouter.delete(
+  "/:id",
+  validate(categoryIdSchema),
+  deleteCategory
+);
 
 module.exports = categoryRouter;

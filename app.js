@@ -8,6 +8,7 @@ const productItemRouter = require("./routes/productItemRoute");
 const orderRouter = require("./routes/orderRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const cartRouter = require("./routes/cartRoute");
+const errorMiddleware = require("./middlewares/error.middleware");
 
 const app = express();
 
@@ -25,5 +26,7 @@ app.use("/api/product", productRouter);
 app.use("/api/productitem", productItemRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/category", categoryRouter);
+
+app.use(errorMiddleware);
 
 module.exports = app;

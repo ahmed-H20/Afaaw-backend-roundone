@@ -1,4 +1,5 @@
 const express = require("express");
+
 const orderRouter = express.Router();
 
 const {
@@ -10,11 +11,45 @@ const {
   deleteOrder,
 } = require("../services/orderService");
 
-orderRouter.post("/", createOrder);
+const validate = require("../middlewares/validation.middleware");
+
+const {
+  createOrderSchema,
+  orderIdSchema,
+  userIdSchema,
+  updateOrderSchema,
+} = require("../validations/order.validation");
+
+orderRouter.post(
+  "/",
+  validate(createOrderSchema),
+  createOrder
+);
+
 orderRouter.get("/", getAllOrders);
-orderRouter.get("/user/:userId", getOrdersByUserId);
-orderRouter.get("/:id", getOrderById);
-orderRouter.put("/:id", updateOrder);
-orderRouter.delete("/:id", deleteOrder);
+
+orderRouter.get(
+  "/user/:userId",
+  validate(userIdSchema),
+  getOrdersByUserId
+);
+
+orderRouter.get(
+  "/:id",
+  validate(orderIdSchema),
+  getOrderById
+);
+
+orderRouter.put(
+  "/:id",
+  validate(updateOrderSchema),
+  updateOrder
+);
+
+orderRouter.delete(
+  "/:id",
+  validate(orderIdSchema),
+  deleteOrder
+);
 
 module.exports = orderRouter;

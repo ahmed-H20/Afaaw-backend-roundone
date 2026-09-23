@@ -1,4 +1,5 @@
 const express = require("express");
+
 const cartRouter = express.Router();
 
 const {
@@ -10,11 +11,45 @@ const {
   deleteCart,
 } = require("../services/cartService");
 
-cartRouter.post("/", createCart);
+const validate = require("../middlewares/validation.middleware");
+
+const {
+  createCartSchema,
+  cartIdSchema,
+  userIdSchema,
+  updateCartSchema,
+} = require("../validations/cart.validation");
+
+cartRouter.post(
+  "/",
+  validate(createCartSchema),
+  createCart
+);
+
 cartRouter.get("/", getAllCarts);
-cartRouter.get("/user/:userId", getCartByUserId);
-cartRouter.get("/:id", getCartById);
-cartRouter.put("/:id", updateCart);
-cartRouter.delete("/:id", deleteCart);
+
+cartRouter.get(
+  "/user/:userId",
+  validate(userIdSchema),
+  getCartByUserId
+);
+
+cartRouter.get(
+  "/:id",
+  validate(cartIdSchema),
+  getCartById
+);
+
+cartRouter.put(
+  "/:id",
+  validate(updateCartSchema),
+  updateCart
+);
+
+cartRouter.delete(
+  "/:id",
+  validate(cartIdSchema),
+  deleteCart
+);
 
 module.exports = cartRouter;
