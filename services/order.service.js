@@ -1,4 +1,6 @@
 const Order = require("../models/order.model");
+const ApiError = require("../utils/ApiError");
+const httpStatusText = require("../constants/httpStatusText");
 
 const createOrder = async (data) => {
   return await Order.create(data);
@@ -9,7 +11,13 @@ const getAllOrders = async () => {
 };
 
 const getOrderById = async (id) => {
-  return await Order.findById(id).populate("userId", "-password");
+  const order = await Order.findById(id).populate("userId", "-password");
+
+  if (!order) {
+    throw new ApiError(404, "Order not found", httpStatusText.FAIL);
+  }
+
+  return order;
 };
 
 const getOrdersByUserId = async (userId) => {
@@ -17,14 +25,26 @@ const getOrdersByUserId = async (userId) => {
 };
 
 const updateOrder = async (id, data) => {
-  return await Order.findByIdAndUpdate(id, data, {
+  const order = await Order.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   }).populate("userId", "-password");
+
+  if (!order) {
+    throw new ApiError(404, "Order not found", httpStatusText.FAIL);
+  }
+
+  return order;
 };
 
 const deleteOrder = async (id) => {
-  return await Order.findByIdAndDelete(id);
+  const order = await Order.findByIdAndDelete(id);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found", httpStatusText.FAIL);
+  }
+
+  return order;
 };
 
 module.exports = {

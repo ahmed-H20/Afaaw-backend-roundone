@@ -1,146 +1,76 @@
 const cartService = require("../services/cart.service");
+const httpStatusText = require("../constants/httpStatusText");
 
 // @desc Create a new cart
 // @route POST /api/carts
 // @access Public
 const createCart = async (req, res) => {
-  try {
-    const cart = await cartService.createCart(req.body);
-
-    res.status(201).json({
-      message: "Cart created successfully",
-      cart,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error creating cart",
-    });
-  }
+  const cart = await cartService.createCart(req.body);
+  res.status(201).json({
+    status: httpStatusText.SUCCESS,
+    message: "Cart created successfully",
+    data: { cart },
+  });
 };
 
 // @desc Get all carts
 // @route GET /api/carts
 // @access Admin
 const getAllCarts = async (req, res) => {
-  try {
-    const carts = await cartService.getAllCarts();
-
-    res.status(200).json({
-      carts,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching carts",
-    });
-  }
+  const carts = await cartService.getAllCarts();
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Carts retrieved successfully",
+    data: { carts },
+  });
 };
 
 // @desc Get cart by ID
 // @route GET /api/carts/:id
 // @access Public
 const getCartById = async (req, res) => {
-  try {
-    const cart = await cartService.getCartById(req.params.id);
-
-    if (!cart) {
-      return res.status(404).json({
-        message: "Cart not found",
-      });
-    }
-
-    res.status(200).json({
-      cart,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching cart",
-    });
-  }
+  const cart = await cartService.getCartById(req.params.id);
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Cart retrieved successfully",
+    data: { cart },
+  });
 };
 
 // @desc Get cart by user ID
 // @route GET /api/carts/user/:userId
 // @access Public
 const getCartByUserId = async (req, res) => {
-  try {
-    const cart = await cartService.getCartByUserId(req.params.userId);
-
-    if (!cart) {
-      return res.status(404).json({
-        message: "Cart not found",
-      });
-    }
-
-    res.status(200).json({
-      cart,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error fetching user cart",
-    });
-  }
+  const cart = await cartService.getCartByUserId(req.params.userId);
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Cart retrieved successfully",
+    data: { cart },
+  });
 };
 
-// @desc Update a cart
+// @desc Update cart
 // @route PUT /api/carts/:id
 // @access Public
 const updateCart = async (req, res) => {
-  try {
-    const cart = await cartService.updateCart(
-      req.params.id,
-      req.body
-    );
-
-    if (!cart) {
-      return res.status(404).json({
-        message: "Cart not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Cart updated successfully",
-      cart,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error updating cart",
-    });
-  }
+  const cart = await cartService.updateCart(req.params.id, req.body);
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Cart updated successfully",
+    data: { cart },
+  });
 };
 
-// @desc Delete a cart
+// @desc Delete cart
 // @route DELETE /api/carts/:id
 // @access Public
 const deleteCart = async (req, res) => {
-  try {
-    const cart = await cartService.deleteCart(req.params.id);
-
-    if (!cart) {
-      return res.status(404).json({
-        message: "Cart not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Cart deleted successfully",
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Error deleting cart",
-    });
-  }
+  await cartService.deleteCart(req.params.id);
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Cart deleted successfully",
+    data: null,
+  });
 };
 
 module.exports = {

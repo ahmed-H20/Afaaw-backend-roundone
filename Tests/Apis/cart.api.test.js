@@ -25,8 +25,8 @@ describe("Cart API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.cart).toBeDefined();
-      expect(response.data.cart.userId).toBe(user._id.toString());
+      expect(response.data.data.cart).toBeDefined();
+      expect(response.data.data.cart.userId).toBe(user._id.toString());
     });
   });
 
@@ -39,9 +39,9 @@ describe("Cart API", () => {
       const response = await axios.get(`${baseURL}/api/carts`);
 
       expect(response.status).toBe(200);
-      expect(response.data.carts).toBeDefined();
-      expect(response.data.carts).toHaveLength(1);
-      expect(response.data.carts[0].userId._id).toBe(user._id.toString());
+      expect(response.data.data.carts).toBeDefined();
+      expect(response.data.data.carts).toHaveLength(1);
+      expect(response.data.data.carts[0].userId._id).toBe(user._id.toString());
     });
   });
 
@@ -54,9 +54,9 @@ describe("Cart API", () => {
       const response = await axios.get(`${baseURL}/api/carts/${cart._id}`);
 
       expect(response.status).toBe(200);
-      expect(response.data.cart).toBeDefined();
-      expect(response.data.cart._id).toBe(cart._id.toString());
-      expect(response.data.cart.userId._id).toBe(user._id.toString());
+      expect(response.data.data.cart).toBeDefined();
+      expect(response.data.data.cart._id).toBe(cart._id.toString());
+      expect(response.data.data.cart.userId._id).toBe(user._id.toString());
     });
   });
 
@@ -71,8 +71,8 @@ describe("Cart API", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data.cart).toBeDefined();
-      expect(response.data.cart._id).toBe(cart._id.toString());
+      expect(response.data.data.cart).toBeDefined();
+      expect(response.data.data.cart._id).toBe(cart._id.toString());
     });
   });
 

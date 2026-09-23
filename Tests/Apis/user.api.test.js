@@ -15,11 +15,11 @@ describe("User API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.user).toBeDefined();
-      expect(response.data.user.fullName).toBe("Mohamed Ayman");
-      expect(response.data.user.email).toBe("mohamed@example.com");
+      expect(response.data.data.user).toBeDefined();
+      expect(response.data.data.user.fullName).toBe("Mohamed Ayman");
+      expect(response.data.data.user.email).toBe("mohamed@example.com");
 
-      expect(response.data.user.password).toBeUndefined();
+      expect(response.data.data.user.password).toBeUndefined();
     });
   });
 
@@ -40,11 +40,11 @@ describe("User API", () => {
       const response = await axios.get(`${baseURL}/api/users`);
 
       expect(response.status).toBe(200);
-      expect(response.data.users).toBeDefined();
-      expect(response.data.users).toHaveLength(2);
+      expect(response.data.data.users).toBeDefined();
+      expect(response.data.data.users).toHaveLength(2);
 
-      expect(response.data.users[0].password).toBeUndefined();
-      expect(response.data.users[1].password).toBeUndefined();
+      expect(response.data.data.users[0].password).toBeUndefined();
+      expect(response.data.data.users[1].password).toBeUndefined();
     });
   });
 
@@ -56,17 +56,15 @@ describe("User API", () => {
         password: "password123",
       });
 
-      const response = await axios.get(
-        `${baseURL}/api/users/${user._id}`
-      );
+      const response = await axios.get(`${baseURL}/api/users/${user._id}`);
 
       expect(response.status).toBe(200);
-      expect(response.data.user).toBeDefined();
-      expect(response.data.user._id).toBe(user._id.toString());
-      expect(response.data.user.fullName).toBe("Mohamed Ayman");
-      expect(response.data.user.email).toBe("mohamed@example.com");
+      expect(response.data.data.user).toBeDefined();
+      expect(response.data.data.user._id).toBe(user._id.toString());
+      expect(response.data.data.user.fullName).toBe("Mohamed Ayman");
+      expect(response.data.data.user.email).toBe("mohamed@example.com");
 
-      expect(response.data.user.password).toBeUndefined();
+      expect(response.data.data.user.password).toBeUndefined();
     });
   });
 
@@ -78,19 +76,16 @@ describe("User API", () => {
         password: "password123",
       });
 
-      const response = await axios.put(
-        `${baseURL}/api/users/${user._id}`,
-        {
-          fullName: "Mohamed Ayman Updated",
-        }
-      );
+      const response = await axios.put(`${baseURL}/api/users/${user._id}`, {
+        fullName: "Mohamed Ayman Updated",
+      });
 
       expect(response.status).toBe(200);
-      expect(response.data.user).toBeDefined();
-      expect(response.data.user.fullName).toBe("Mohamed Ayman Updated");
-      expect(response.data.user.email).toBe("mohamed@example.com");
+      expect(response.data.data.user).toBeDefined();
+      expect(response.data.data.user.fullName).toBe("Mohamed Ayman Updated");
+      expect(response.data.data.user.email).toBe("mohamed@example.com");
 
-      expect(response.data.user.password).toBeUndefined();
+      expect(response.data.data.user.password).toBeUndefined();
     });
   });
 
@@ -102,9 +97,7 @@ describe("User API", () => {
         password: "password123",
       });
 
-      const response = await axios.delete(
-        `${baseURL}/api/users/${user._id}`
-      );
+      const response = await axios.delete(`${baseURL}/api/users/${user._id}`);
 
       expect(response.status).toBe(200);
 

@@ -26,10 +26,10 @@ describe("Product API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.product).toBeDefined();
-      expect(response.data.product.name).toBe("Keyboard");
-      expect(response.data.product.price).toBe(1500);
-      expect(response.data.product.stock).toBe(20);
+      expect(response.data.data.product).toBeDefined();
+      expect(response.data.data.product.name).toBe("Keyboard");
+      expect(response.data.data.product.price).toBe(1500);
+      expect(response.data.data.product.stock).toBe(20);
     });
   });
 
@@ -52,10 +52,10 @@ describe("Product API", () => {
       const response = await axios.get(`${baseURL}/api/products`);
 
       expect(response.status).toBe(200);
-      expect(response.data.products).toBeDefined();
-      expect(response.data.products).toHaveLength(2);
-      expect(response.data.products[0].name).toBe("Keyboard");
-      expect(response.data.products[1].name).toBe("Mouse");
+      expect(response.data.data.products).toBeDefined();
+      expect(response.data.data.products).toHaveLength(2);
+      expect(response.data.data.products[0].name).toBe("Keyboard");
+      expect(response.data.data.products[1].name).toBe("Mouse");
     });
   });
 
@@ -73,10 +73,10 @@ describe("Product API", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.data.product).toBeDefined();
-      expect(response.data.product._id).toBe(product._id.toString());
-      expect(response.data.product.name).toBe("Keyboard");
-      expect(response.data.product.price).toBe(1500);
+      expect(response.data.data.product).toBeDefined();
+      expect(response.data.data.product._id).toBe(product._id.toString());
+      expect(response.data.data.product.name).toBe("Keyboard");
+      expect(response.data.data.product.price).toBe(1500);
     });
   });
 
@@ -99,10 +99,10 @@ describe("Product API", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.data.product).toBeDefined();
-      expect(response.data.product.name).toBe("Mechanical Keyboard");
-      expect(response.data.product.price).toBe(2500);
-      expect(response.data.product.stock).toBe(15);
+      expect(response.data.data.product).toBeDefined();
+      expect(response.data.data.product.name).toBe("Mechanical Keyboard");
+      expect(response.data.data.product.price).toBe(2500);
+      expect(response.data.data.product.stock).toBe(15);
     });
   });
 

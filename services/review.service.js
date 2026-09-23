@@ -1,4 +1,6 @@
 const Review = require("../models/review.model");
+const ApiError = require("../utils/ApiError");
+const httpStatusText = require("../constants/httpStatusText");
 
 const createReview = async (data) => {
   return await Review.create(data);
@@ -11,9 +13,15 @@ const getAllReviews = async () => {
 };
 
 const getReviewById = async (id) => {
-  return await Review.findById(id)
+  const review = await Review.findById(id)
     .populate("userId", "-password")
     .populate("productId");
+
+  if (!review) {
+    throw new ApiError(404, "Review not found", httpStatusText.FAIL);
+  }
+
+  return review;
 };
 
 const getReviewsByProductId = async (productId) => {
@@ -23,16 +31,28 @@ const getReviewsByProductId = async (productId) => {
 };
 
 const updateReview = async (id, data) => {
-  return await Review.findByIdAndUpdate(id, data, {
+  const review = await Review.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   })
     .populate("userId", "-password")
     .populate("productId");
+
+  if (!review) {
+    throw new ApiError(404, "Review not found", httpStatusText.FAIL);
+  }
+
+  return review;
 };
 
 const deleteReview = async (id) => {
-  return await Review.findByIdAndDelete(id);
+  const review = await Review.findByIdAndDelete(id);
+
+  if (!review) {
+    throw new ApiError(404, "Review not found", httpStatusText.FAIL);
+  }
+
+  return review;
 };
 
 module.exports = {

@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
+const ApiError = require("../utils/ApiError");
+const httpStatusText = require("../constants/httpStatusText");
 
 const createUser = async (data) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -15,7 +17,13 @@ const getAllUsers = async () => {
 };
 
 const getUserById = async (id) => {
-  return await User.findById(id).select("-password");
+  const user = await User.findById(id).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "User not found", httpStatusText.FAIL);
+  }
+
+  return user;
 };
 
 const updateUser = async (id, data) => {
@@ -25,14 +33,26 @@ const updateUser = async (id, data) => {
     updateData.password = await bcrypt.hash(updateData.password, 10);
   }
 
-  return await User.findByIdAndUpdate(id, updateData, {
+  const user = await User.findByIdAndUpdate(id, updateData, {
     returnDocument: "after",
     runValidators: true,
   }).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "User not found", httpStatusText.FAIL);
+  }
+
+  return user;
 };
 
 const deleteUser = async (id) => {
-  return await User.findByIdAndDelete(id);
+  const user = await User.findByIdAndDelete(id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found", httpStatusText.FAIL);
+  }
+
+  return user;
 };
 
 const getUserByEmail = async (email) => {

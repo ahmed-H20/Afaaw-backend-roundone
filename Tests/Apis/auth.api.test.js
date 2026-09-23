@@ -19,13 +19,13 @@ describe("Auth API", () => {
 
       expect(response.data.message).toBe("User registered successfully");
 
-      expect(response.data.user).toBeDefined();
-      expect(response.data.user.fullName).toBe("Mohamed Ayman");
-      expect(response.data.user.email).toBe("mohamed@example.com");
-      expect(response.data.user.password).toBeUndefined();
+      expect(response.data.data.user).toBeDefined();
+      expect(response.data.data.user.fullName).toBe("Mohamed Ayman");
+      expect(response.data.data.user.email).toBe("mohamed@example.com");
+      expect(response.data.data.user.password).toBeUndefined();
 
-      expect(response.data.token).toBeDefined();
-      expect(typeof response.data.token).toBe("string");
+      expect(response.data.data.token).toBeDefined();
+      expect(typeof response.data.data.token).toBe("string");
 
       const user = await User.findOne({
         email: "mohamed@example.com",
@@ -72,12 +72,12 @@ describe("Auth API", () => {
 
       expect(response.data.message).toBe("Login successful");
 
-      expect(response.data.user).toBeDefined();
-      expect(response.data.user.email).toBe("mohamed@example.com");
-      expect(response.data.user.password).toBeUndefined();
+      expect(response.data.data.user).toBeDefined();
+      expect(response.data.data.user.email).toBe("mohamed@example.com");
+      expect(response.data.data.user.password).toBeUndefined();
 
-      expect(response.data.token).toBeDefined();
-      expect(typeof response.data.token).toBe("string");
+      expect(response.data.data.token).toBeDefined();
+      expect(typeof response.data.data.token).toBe("string");
     });
 
     it("should reject invalid password", async () => {

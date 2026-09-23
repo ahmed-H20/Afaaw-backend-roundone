@@ -45,11 +45,11 @@ describe("Review API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.review).toBeDefined();
-      expect(response.data.review.rating).toBe(5);
-      expect(response.data.review.comment).toBe("Excellent product");
-      expect(response.data.review.userId).toBe(user._id.toString());
-      expect(response.data.review.productId).toBe(product._id.toString());
+      expect(response.data.data.review).toBeDefined();
+      expect(response.data.data.review.rating).toBe(5);
+      expect(response.data.data.review.comment).toBe("Excellent product");
+      expect(response.data.data.review.userId).toBe(user._id.toString());
+      expect(response.data.data.review.productId).toBe(product._id.toString());
     });
   });
 
@@ -65,9 +65,9 @@ describe("Review API", () => {
       const response = await axios.get(`${baseURL}/api/reviews`);
 
       expect(response.status).toBe(200);
-      expect(response.data.reviews).toBeDefined();
-      expect(response.data.reviews).toHaveLength(1);
-      expect(response.data.reviews[0].rating).toBe(5);
+      expect(response.data.data.reviews).toBeDefined();
+      expect(response.data.data.reviews).toHaveLength(1);
+      expect(response.data.data.reviews[0].rating).toBe(5);
     });
   });
 
@@ -83,10 +83,10 @@ describe("Review API", () => {
       const response = await axios.get(`${baseURL}/api/reviews/${review._id}`);
 
       expect(response.status).toBe(200);
-      expect(response.data.review).toBeDefined();
-      expect(response.data.review._id).toBe(review._id.toString());
-      expect(response.data.review.rating).toBe(4);
-      expect(response.data.review.comment).toBe("Good product");
+      expect(response.data.data.review).toBeDefined();
+      expect(response.data.data.review._id).toBe(review._id.toString());
+      expect(response.data.data.review.rating).toBe(4);
+      expect(response.data.data.review.comment).toBe("Good product");
     });
   });
 
@@ -105,9 +105,9 @@ describe("Review API", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data.review).toBeDefined();
-      expect(response.data.review.rating).toBe(5);
-      expect(response.data.review.comment).toBe("Excellent product");
+      expect(response.data.data.review).toBeDefined();
+      expect(response.data.data.review.rating).toBe(5);
+      expect(response.data.data.review.comment).toBe("Excellent product");
     });
   });
 

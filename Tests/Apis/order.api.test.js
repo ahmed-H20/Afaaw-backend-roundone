@@ -25,9 +25,9 @@ describe("Order API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.order).toBeDefined();
-      expect(response.data.order.userId).toBe(user._id.toString());
-      expect(response.data.order.status).toBe("pending");
+      expect(response.data.data.order).toBeDefined();
+      expect(response.data.data.order.userId).toBe(user._id.toString());
+      expect(response.data.data.order.status).toBe("pending");
     });
   });
 
@@ -40,9 +40,9 @@ describe("Order API", () => {
       const response = await axios.get(`${baseURL}/api/orders`);
 
       expect(response.status).toBe(200);
-      expect(response.data.orders).toBeDefined();
-      expect(response.data.orders).toHaveLength(1);
-      expect(response.data.orders[0].userId._id).toBe(user._id.toString());
+      expect(response.data.data.orders).toBeDefined();
+      expect(response.data.data.orders).toHaveLength(1);
+      expect(response.data.data.orders[0].userId._id).toBe(user._id.toString());
     });
   });
 
@@ -55,9 +55,9 @@ describe("Order API", () => {
       const response = await axios.get(`${baseURL}/api/orders/${order._id}`);
 
       expect(response.status).toBe(200);
-      expect(response.data.order).toBeDefined();
-      expect(response.data.order._id).toBe(order._id.toString());
-      expect(response.data.order.status).toBe("pending");
+      expect(response.data.data.order).toBeDefined();
+      expect(response.data.data.order._id).toBe(order._id.toString());
+      expect(response.data.data.order.status).toBe("pending");
     });
   });
 
@@ -72,8 +72,8 @@ describe("Order API", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data.order).toBeDefined();
-      expect(response.data.order.status).toBe("confirmed");
+      expect(response.data.data.order).toBeDefined();
+      expect(response.data.data.order.status).toBe("confirmed");
     });
   });
 

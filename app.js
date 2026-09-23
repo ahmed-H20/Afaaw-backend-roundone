@@ -8,6 +8,9 @@ const orderRoute = require("./routes/order.route");
 const reviewRoute = require("./routes/review.route");
 const authRoute = require("./routes/auth.route");
 
+const notFound = require("./middleware/not-found.middleware");
+const errorHandler = require("./middleware/error.middleware");
+
 const app = express();
 
 app.use(express.json());
@@ -23,5 +26,11 @@ app.use("/api/users", userRoute);
 app.use("/api/carts", cartRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/reviews", reviewRoute);
+
+// 404
+app.use(notFound);
+
+// Global Error Handler
+app.use(errorHandler);
 
 module.exports = app;

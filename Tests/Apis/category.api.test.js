@@ -13,8 +13,8 @@ describe("Category API", () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.data.category).toBeDefined();
-      expect(response.data.category.name).toBe("Electronics");
+      expect(response.data.data.category).toBeDefined();
+      expect(response.data.data.category.name).toBe("Electronics");
     });
   });
 
@@ -31,10 +31,10 @@ describe("Category API", () => {
       const response = await axios.get(`${baseURL}/api/categories`);
 
       expect(response.status).toBe(200);
-      expect(response.data.categories).toBeDefined();
-      expect(response.data.categories).toHaveLength(2);
-      expect(response.data.categories[0].name).toBe("Electronics");
-      expect(response.data.categories[1].name).toBe("Clothing");
+      expect(response.data.data.categories).toBeDefined();
+      expect(response.data.data.categories).toHaveLength(2);
+      expect(response.data.data.categories[0].name).toBe("Electronics");
+      expect(response.data.data.categories[1].name).toBe("Clothing");
     });
   });
 
@@ -49,9 +49,9 @@ describe("Category API", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.data.category).toBeDefined();
-      expect(response.data.category._id).toBe(category._id.toString());
-      expect(response.data.category.name).toBe("Electronics");
+      expect(response.data.data.category).toBeDefined();
+      expect(response.data.data.category._id).toBe(category._id.toString());
+      expect(response.data.data.category.name).toBe("Electronics");
     });
   });
 
@@ -69,8 +69,8 @@ describe("Category API", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.data.category).toBeDefined();
-      expect(response.data.category.name).toBe("Updated Electronics");
+      expect(response.data.data.category).toBeDefined();
+      expect(response.data.data.category.name).toBe("Updated Electronics");
     });
   });
 
