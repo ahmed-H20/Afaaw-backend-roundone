@@ -1,18 +1,47 @@
 const express = require("express");
-const router = express.Router();
+
+const productRouter = express.Router();
 
 const {
-    createProduct,
-    getAllProducts,
-    getProductById,
-    updateProduct,
-    deleteProduct,
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
 } = require("../services/productService");
 
-router.post("/", createProduct);
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+const validate = require("../middlewares/validation.middleware");
 
-module.exports = router;
+const {
+  createProductSchema,
+  productIdSchema,
+  updateProductSchema,
+} = require("../validations/product.validation");
+
+productRouter.post(
+  "/",
+  validate(createProductSchema),
+  createProduct
+);
+
+productRouter.get("/", getAllProducts);
+
+productRouter.get(
+  "/:id",
+  validate(productIdSchema),
+  getProductById
+);
+
+productRouter.put(
+  "/:id",
+  validate(updateProductSchema),
+  updateProduct
+);
+
+productRouter.delete(
+  "/:id",
+  validate(productIdSchema),
+  deleteProduct
+);
+
+module.exports = productRouter;

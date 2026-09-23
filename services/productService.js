@@ -1,16 +1,19 @@
 const Product = require("../models/productsModel");
+const AppError = require("../errors/AppError");
 
 // @desc Create a new product
 // @route POST /api/products
 // @access Admin
 const createProduct = async (req, res, next) => {
   try {
-    console.log(req.body)
     const product = await Product.create(req.body);
-    res.status(201).json({ message: "Product created successfully", product });
+
+    res.status(201).json({
+      message: "Product created successfully",
+      product,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating product" });
+    next(error);
   }
 };
 
@@ -20,10 +23,10 @@ const createProduct = async (req, res, next) => {
 const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
+
     res.status(200).json({ products });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching products" });
+    next(error);
   }
 };
 
@@ -33,13 +36,14 @@ const getAllProducts = async (req, res, next) => {
 const getProductById = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id);
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return next(new AppError("Product not found", 404));
     }
+
     res.status(200).json({ product });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching product" });
+    next(error);
   }
 };
 
@@ -48,16 +52,24 @@ const getProductById = async (req, res, next) => {
 // @access Admin
 const updateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return next(new AppError("Product not found", 404));
     }
-    res.status(200).json({ message: "Product updated successfully", product });
+
+    res.status(200).json({
+      message: "Product updated successfully",
+      product,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating product" });
+    next(error);
   }
 };
 
@@ -67,13 +79,16 @@ const updateProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return next(new AppError("Product not found", 404));
     }
-    res.status(200).json({ message: "Product deleted successfully" });
+
+    res.status(200).json({
+      message: "Product deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting product" });
+    next(error);
   }
 };
 
