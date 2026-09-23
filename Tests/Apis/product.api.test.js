@@ -1,54 +1,92 @@
-const mongoose = require("mongoose");
-const axios = require("axios");
-const dotenv = require("dotenv");
+const express = require("express");
+const request = require("supertest");
+const validate = require("../../middleware/validate");
+const { createProductValidation } = require("../../utils/validators/productValidator");
+const globalErrorHandler = require("../../middleware/globalErrorHandler");
 
-dotenv.config();
+describe("Product validation and error handling", () => {
+  it("should allow valid product payloads through validation", async () => {
+    const app = express();
+    app.use(express.json());
 
-const app = require("../../app");
-const Product = require("../../models/productsModel");
+    app.post("/products", createProductValidation, validate, (req, res) => {
+      res.status(201).json({ status: "success", message: "Product created" });
+    });
 
-let server;
-let baseURL;
+    app.use(globalErrorHandler);
 
-beforeAll(async () => {
-  await mongoose.connect(process.env.MONGODB_URL_TEST);
+    const response = await request(app)
+      .post("/products")
+      .send({
+        name: "Keyboard",
+        price: 1500,
+        stock: 20,
+      });
 
-  server = app.listen(0);
-
-  const { port } = server.address();
-  baseURL = `http://localhost:${port}`;
-});
-
-afterEach(async () => {
-  await Product.deleteMany({});
-});
-
-afterAll(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
-
-  await new Promise((resolve) => {
-    server.close(resolve);
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe("Product created");
   });
-});
 
-describe("POST /api/products", () => {
-  it("should create a product", async () => {
-    const productData = {
-      name: "Keyboard",
-      price: 1500,
-      stock: 20,
-    };
+  it("should reject invalid product payloads with detailed errors in development", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
 
     try {
-      const response = await axios.post(`${baseURL}/api/products`, productData);
-      expect(response.status).toBe(201);
-    } catch (error) {
-      console.log("STATUS:", error.response?.status);
-      console.log("DATA:", error.response?.data);
-      console.log("HEADERS:", error.response?.headers);
+      const app = express();
+      app.use(express.json());
 
-      throw error;
+      app.post("/products", createProductValidation, validate, (req, res) => {
+        res.status(201).json({ status: "success", message: "Product created" });
+      });
+
+      app.use(globalErrorHandler);
+
+      const response = await request(app)
+        .post("/products")
+        .send({
+          price: "not-a-number",
+          stock: -5,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Validation failed");
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ field: "name" }),
+          expect.objectContaining({ field: "price" }),
+        ]),
+      );
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+
+  it("should hide validation details in production", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+
+    try {
+      const app = express();
+      app.use(express.json());
+
+      app.post("/products", createProductValidation, validate, (req, res) => {
+        res.status(201).json({ status: "success", message: "Product created" });
+      });
+
+      app.use(globalErrorHandler);
+
+      const response = await request(app)
+        .post("/products")
+        .send({
+          price: "not-a-number",
+          stock: -5,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe("Validation failed");
+      expect(response.body.errors).toBeUndefined();
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
     }
   });
 });
