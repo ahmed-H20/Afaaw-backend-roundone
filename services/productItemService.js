@@ -1,4 +1,5 @@
 const ProductItem = require("../models/productItemsModel");
+const AppError = require("../errors/AppError");
 
 // @desc Create a new product item
 // @route POST /api/product-items
@@ -6,13 +7,13 @@ const ProductItem = require("../models/productItemsModel");
 const createProductItem = async (req, res, next) => {
   try {
     const productItem = await ProductItem.create(req.body);
+
     res.status(201).json({
       message: "Product item created successfully",
       productItem,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating product item" });
+    next(error);
   }
 };
 
@@ -22,10 +23,10 @@ const createProductItem = async (req, res, next) => {
 const getAllProductItems = async (req, res, next) => {
   try {
     const productItems = await ProductItem.find();
+
     res.status(200).json({ productItems });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching product items" });
+    next(error);
   }
 };
 
@@ -35,13 +36,14 @@ const getAllProductItems = async (req, res, next) => {
 const getProductItemById = async (req, res, next) => {
   try {
     const productItem = await ProductItem.findById(req.params.id);
+
     if (!productItem) {
-      return res.status(404).json({ message: "Product item not found" });
+      return next(new AppError("Product item not found", 404));
     }
+
     res.status(200).json({ productItem });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching product item" });
+    next(error);
   }
 };
 
@@ -53,10 +55,10 @@ const getProductItemsByProductId = async (req, res, next) => {
     const productItems = await ProductItem.find({
       productId: req.params.productId,
     });
+
     res.status(200).json({ productItems });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching product items for product" });
+    next(error);
   }
 };
 
@@ -70,16 +72,17 @@ const updateProductItem = async (req, res, next) => {
       req.body,
       { new: true }
     );
+
     if (!productItem) {
-      return res.status(404).json({ message: "Product item not found" });
+      return next(new AppError("Product item not found", 404));
     }
+
     res.status(200).json({
       message: "Product item updated successfully",
       productItem,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating product item" });
+    next(error);
   }
 };
 
@@ -89,13 +92,16 @@ const updateProductItem = async (req, res, next) => {
 const deleteProductItem = async (req, res, next) => {
   try {
     const productItem = await ProductItem.findByIdAndDelete(req.params.id);
+
     if (!productItem) {
-      return res.status(404).json({ message: "Product item not found" });
+      return next(new AppError("Product item not found", 404));
     }
-    res.status(200).json({ message: "Product item deleted successfully" });
+
+    res.status(200).json({
+      message: "Product item deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting product item" });
+    next(error);
   }
 };
 

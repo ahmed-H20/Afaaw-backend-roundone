@@ -1,29 +1,19 @@
 const Review = require("../models/reviewsModel");
+const AppError = require("../errors/AppError");
 
 // @desc Create a new review
 // @route POST /api/reviews
 // @access User
 const createReview = async (req, res, next) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({ message: "Review data is required" });
-    }
-
-    if (req.body.rating < 1 || req.body.rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be between 1 and 5" });
-    }
-
-    if (!req.body.comment) {
-      return res.status(400).json({ message: "Comment is required" });
-    }
-
     const review = await Review.create(req.body);
-    res.status(201).json({ message: "Review created successfully", review });
+
+    res.status(201).json({
+      message: "Review created successfully",
+      review,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating review" });
+    next(error);
   }
 };
 
@@ -32,11 +22,13 @@ const createReview = async (req, res, next) => {
 // @access Public
 const getReviewsByProductId = async (req, res, next) => {
   try {
-    const reviews = await Review.find({ productId: req.params.productId });
+    const reviews = await Review.find({
+      productId: req.params.productId,
+    });
+
     res.status(200).json({ reviews });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching reviews" });
+    next(error);
   }
 };
 
@@ -45,11 +37,13 @@ const getReviewsByProductId = async (req, res, next) => {
 // @access User
 const getReviewsByUserId = async (req, res, next) => {
   try {
-    const reviews = await Review.find({ userId: req.params.userId });
+    const reviews = await Review.find({
+      userId: req.params.userId,
+    });
+
     res.status(200).json({ reviews });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching reviews" });
+    next(error);
   }
 };
 

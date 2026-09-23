@@ -1,5 +1,5 @@
 const User = require("../models/userModels");
-
+const AppError = require("../errors/AppError");
 
 // @desc Create a new user
 // @route POST /api/users
@@ -7,10 +7,13 @@ const User = require("../models/userModels");
 const createUser = async (req, res, next) => {
   try {
     const user = await User.create(req.body);
-    res.status(201).json({ message: "User created successfully", user });
+
+    res.status(201).json({
+      message: "User created successfully",
+      user,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating user" });
+    next(error);
   }
 };
 
@@ -20,10 +23,10 @@ const createUser = async (req, res, next) => {
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();
+
     res.status(200).json({ users });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching users" });
+    next(error);
   }
 };
 
@@ -33,13 +36,14 @@ const getAllUsers = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return next(new AppError("User not found", 404));
     }
+
     res.status(200).json({ user });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching user" });
+    next(error);
   }
 };
 
@@ -48,16 +52,24 @@ const getUserById = async (req, res, next) => {
 // @access Public / Admin
 const updateUser = async (req, res, next) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return next(new AppError("User not found", 404));
     }
-    res.status(200).json({ message: "User updated successfully", user });
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating user" });
+    next(error);
   }
 };
 
@@ -67,13 +79,16 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return next(new AppError("User not found", 404));
     }
-    res.status(200).json({ message: "User deleted successfully" });
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting user" });
+    next(error);
   }
 };
 

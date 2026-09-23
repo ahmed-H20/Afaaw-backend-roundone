@@ -1,5 +1,5 @@
 const CartItem = require("../models/cartItemsModel");
-
+const AppError = require("../errors/AppError");
 
 // @desc Create a new cart item
 // @route POST /api/cart-items
@@ -7,10 +7,13 @@ const CartItem = require("../models/cartItemsModel");
 const createCartItem = async (req, res, next) => {
   try {
     const cartItem = await CartItem.create(req.body);
-    res.status(201).json({ message: "Cart item created successfully", cartItem });
+
+    res.status(201).json({
+      message: "Cart item created successfully",
+      cartItem,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating cart item" });
+    next(error);
   }
 };
 
@@ -20,10 +23,10 @@ const createCartItem = async (req, res, next) => {
 const getAllCartItems = async (req, res, next) => {
   try {
     const cartItems = await CartItem.find();
+
     res.status(200).json({ cartItems });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching cart items" });
+    next(error);
   }
 };
 
@@ -33,13 +36,14 @@ const getAllCartItems = async (req, res, next) => {
 const getCartItemById = async (req, res, next) => {
   try {
     const cartItem = await CartItem.findById(req.params.id);
+
     if (!cartItem) {
-      return res.status(404).json({ message: "Cart item not found" });
+      return next(new AppError("Cart item not found", 404));
     }
+
     res.status(200).json({ cartItem });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching cart item" });
+    next(error);
   }
 };
 
@@ -48,11 +52,13 @@ const getCartItemById = async (req, res, next) => {
 // @access User / Admin
 const getCartItemsByCartId = async (req, res, next) => {
   try {
-    const cartItems = await CartItem.find({ cartId: req.params.cartId });
+    const cartItems = await CartItem.find({
+      cartId: req.params.cartId,
+    });
+
     res.status(200).json({ cartItems });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching cart items for cart" });
+    next(error);
   }
 };
 
@@ -61,16 +67,24 @@ const getCartItemsByCartId = async (req, res, next) => {
 // @access User / Admin
 const updateCartItem = async (req, res, next) => {
   try {
-    const cartItem = await CartItem.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const cartItem = await CartItem.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
     if (!cartItem) {
-      return res.status(404).json({ message: "Cart item not found" });
+      return next(new AppError("Cart item not found", 404));
     }
-    res.status(200).json({ message: "Cart item updated successfully", cartItem });
+
+    res.status(200).json({
+      message: "Cart item updated successfully",
+      cartItem,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating cart item" });
+    next(error);
   }
 };
 
@@ -80,13 +94,16 @@ const updateCartItem = async (req, res, next) => {
 const deleteCartItem = async (req, res, next) => {
   try {
     const cartItem = await CartItem.findByIdAndDelete(req.params.id);
+
     if (!cartItem) {
-      return res.status(404).json({ message: "Cart item not found" });
+      return next(new AppError("Cart item not found", 404));
     }
-    res.status(200).json({ message: "Cart item deleted successfully" });
+
+    res.status(200).json({
+      message: "Cart item deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting cart item" });
+    next(error);
   }
 };
 

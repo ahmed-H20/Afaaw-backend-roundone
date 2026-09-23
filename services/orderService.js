@@ -1,4 +1,5 @@
 const Order = require("../models/orderModel");
+const AppError = require("../errors/AppError");
 
 // @desc Create a new order
 // @route POST /api/orders
@@ -6,10 +7,13 @@ const Order = require("../models/orderModel");
 const createOrder = async (req, res, next) => {
   try {
     const order = await Order.create(req.body);
-    res.status(201).json({ message: "Order created successfully", order });
+
+    res.status(201).json({
+      message: "Order created successfully",
+      order,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating order" });
+    next(error);
   }
 };
 
@@ -19,10 +23,10 @@ const createOrder = async (req, res, next) => {
 const getAllOrders = async (req, res, next) => {
   try {
     const orders = await Order.find();
+
     res.status(200).json({ orders });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching orders" });
+    next(error);
   }
 };
 
@@ -32,13 +36,14 @@ const getAllOrders = async (req, res, next) => {
 const getOrderById = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return next(new AppError("Order not found", 404));
     }
+
     res.status(200).json({ order });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching order" });
+    next(error);
   }
 };
 
@@ -47,11 +52,13 @@ const getOrderById = async (req, res, next) => {
 // @access User / Admin
 const getOrdersByUserId = async (req, res, next) => {
   try {
-    const orders = await Order.find({ userId: req.params.userId });
+    const orders = await Order.find({
+      userId: req.params.userId,
+    });
+
     res.status(200).json({ orders });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching user orders" });
+    next(error);
   }
 };
 
@@ -60,16 +67,24 @@ const getOrdersByUserId = async (req, res, next) => {
 // @access Admin
 const updateOrder = async (req, res, next) => {
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return next(new AppError("Order not found", 404));
     }
-    res.status(200).json({ message: "Order updated successfully", order });
+
+    res.status(200).json({
+      message: "Order updated successfully",
+      order,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating order" });
+    next(error);
   }
 };
 
@@ -79,13 +94,16 @@ const updateOrder = async (req, res, next) => {
 const deleteOrder = async (req, res, next) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return next(new AppError("Order not found", 404));
     }
-    res.status(200).json({ message: "Order deleted successfully" });
+
+    res.status(200).json({
+      message: "Order deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting order" });
+    next(error);
   }
 };
 

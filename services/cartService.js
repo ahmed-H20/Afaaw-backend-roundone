@@ -1,4 +1,5 @@
 const Cart = require("../models/cartModel");
+const AppError = require("../errors/AppError");
 
 // @desc Create a new cart
 // @route POST /api/carts
@@ -6,10 +7,13 @@ const Cart = require("../models/cartModel");
 const createCart = async (req, res, next) => {
   try {
     const cart = await Cart.create(req.body);
-    res.status(201).json({ message: "Cart created successfully", cart });
+
+    res.status(201).json({
+      message: "Cart created successfully",
+      cart,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating cart" });
+    next(error);
   }
 };
 
@@ -19,10 +23,10 @@ const createCart = async (req, res, next) => {
 const getAllCarts = async (req, res, next) => {
   try {
     const carts = await Cart.find();
+
     res.status(200).json({ carts });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching carts" });
+    next(error);
   }
 };
 
@@ -32,13 +36,14 @@ const getAllCarts = async (req, res, next) => {
 const getCartById = async (req, res, next) => {
   try {
     const cart = await Cart.findById(req.params.id);
+
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return next(new AppError("Cart not found", 404));
     }
+
     res.status(200).json({ cart });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching cart" });
+    next(error);
   }
 };
 
@@ -47,14 +52,17 @@ const getCartById = async (req, res, next) => {
 // @access User / Admin
 const getCartByUserId = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({ userId: req.params.userId });
+    const cart = await Cart.findOne({
+      userId: req.params.userId,
+    });
+
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found for this user" });
+      return next(new AppError("Cart not found for this user", 404));
     }
+
     res.status(200).json({ cart });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching cart" });
+    next(error);
   }
 };
 
@@ -63,16 +71,24 @@ const getCartByUserId = async (req, res, next) => {
 // @access User / Admin
 const updateCart = async (req, res, next) => {
   try {
-    const cart = await Cart.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const cart = await Cart.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
+    );
+
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return next(new AppError("Cart not found", 404));
     }
-    res.status(200).json({ message: "Cart updated successfully", cart });
+
+    res.status(200).json({
+      message: "Cart updated successfully",
+      cart,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating cart" });
+    next(error);
   }
 };
 
@@ -82,13 +98,16 @@ const updateCart = async (req, res, next) => {
 const deleteCart = async (req, res, next) => {
   try {
     const cart = await Cart.findByIdAndDelete(req.params.id);
+
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return next(new AppError("Cart not found", 404));
     }
-    res.status(200).json({ message: "Cart deleted successfully" });
+
+    res.status(200).json({
+      message: "Cart deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting cart" });
+    next(error);
   }
 };
 
