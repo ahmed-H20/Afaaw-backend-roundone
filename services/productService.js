@@ -1,80 +1,44 @@
 const Product = require("../models/productsModel");
+const ApiError = require("../utils/ApiError");
 
-// @desc Create a new product
-// @route POST /api/products
-// @access Admin
-const createProduct = async (req, res, next) => {
-  try {
-    console.log(req.body)
-    const product = await Product.create(req.body);
-    res.status(201).json({ message: "Product created successfully", product });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating product" });
-  }
+// Create a new product
+const createProduct = async (data) => {
+  return await Product.create(data);
 };
 
-// @desc Get all products
-// @route GET /api/products
-// @access Public
-const getAllProducts = async (req, res, next) => {
-  try {
-    const products = await Product.find();
-    res.status(200).json({ products });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching products" });
-  }
+// Get all products
+const getAllProducts = async () => {
+  return await Product.find();
 };
 
-// @desc Get a product by ID
-// @route GET /api/products/:id
-// @access Public
-const getProductById = async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({ product });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching product" });
+// Get a single product by ID
+const getProductById = async (id) => {
+  const product = await Product.findById(id);
+  if (!product) {
+    throw ApiError.notFound("Product not found");
   }
+  return product;
 };
 
-// @desc Update a product
-// @route PUT /api/products/:id
-// @access Admin
-const updateProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({ message: "Product updated successfully", product });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating product" });
+// Update a product by ID
+const updateProduct = async (id, data) => {
+  const product = await Product.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
+  });
+  if (!product) {
+    throw ApiError.notFound("Product not found");
   }
+  return product;
 };
 
-// @desc Delete a product
-// @route DELETE /api/products/:id
-// @access Admin
-const deleteProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({ message: "Product deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting product" });
+// Delete a product by ID
+const deleteProduct = async (id) => {
+  const product = await Product.findByIdAndDelete(id);
+  if (!product) {
+    throw ApiError.notFound("Product not found");
   }
+  return product;
 };
 
 module.exports = {
