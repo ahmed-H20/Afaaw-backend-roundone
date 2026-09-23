@@ -7,6 +7,8 @@ const categoryRoute = require('./routes/categoryRoutes');
 const orderRoute = require('./routes/orderRoutes');
 const reviewRoute = require('./routes/reviewRoutes');
 const userRoute = require('./routes/userRoutes');
+const ApiError = require('./utils/ApiError');
+const globalError = require('./middleware/errorHandler.middleware');
 
 dotenv.config();
 const app = express();
@@ -28,6 +30,12 @@ const startServer = async () => {
 		app.use('/api/v1/order', orderRoute);
 		app.use('/api/v1/review', reviewRoute);
 		app.use('/api/v1/user', userRoute);
+
+		app.use((req, res, next) => {
+			next(new ApiError('Route is not found', 404));
+		});
+
+		app.use(globalError);
 
 		app.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`);

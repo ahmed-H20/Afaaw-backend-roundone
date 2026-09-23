@@ -9,10 +9,16 @@ const {
 	deleteProduct,
 } = require('../services/productService');
 
-router.post('/', createProduct);
+const {
+	createProductValidator,
+	updateProductValidator,
+	productIdValidator,
+} = require('../utils/validation/productValidation');
+
+router.post('/', createProductValidator, createProduct);
 router.get('/', getAllProducts);
-router.get('/:id', getProductById);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+router.get('/:id', productIdValidator, getProductById);
+router.put('/:id', updateProductValidator, updateProduct);
+router.delete('/:id', productIdValidator, deleteProduct);
 
 module.exports = router;

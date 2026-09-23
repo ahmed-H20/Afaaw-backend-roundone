@@ -7,10 +7,15 @@ const {
 	getOrderById,
 	updateOrderStatus,
 } = require('../services/orderService');
+const {
+	createOrderValidator,
+	updateOrderStatusValidator,
+	orderIdValidator,
+} = require('../utils/validation/orderValidation');
 
-router.post('/', createOrder);
+router.post('/', createOrderValidator, createOrder);
 router.get('/', getAllOrders);
-router.get('/:id', getOrderById);
-router.put('/:id/status', updateOrderStatus);
+router.get('/:id', orderIdValidator, getOrderById);
+router.put('/:id/status', updateOrderStatusValidator, updateOrderStatus);
 
 module.exports = router;

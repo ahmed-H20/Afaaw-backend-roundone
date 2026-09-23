@@ -9,10 +9,16 @@ const {
 	deleteUser,
 } = require('../services/userService');
 
-router.post('/', createUser);
+const {
+	createUserValidator,
+	updateUserValidator,
+	userIdValidator,
+} = require('../utils/validation/userValidation');
+
+router.post('/', createUserValidator, createUser);
 router.get('/', getAllUsers);
-router.get('/:id', getUserById);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.get('/:id', userIdValidator, getUserById);
+router.put('/:id', updateUserValidator, updateUser);
+router.delete('/:id', userIdValidator, deleteUser);
 
 module.exports = router;

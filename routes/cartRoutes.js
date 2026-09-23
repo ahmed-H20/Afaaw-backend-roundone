@@ -7,10 +7,16 @@ const {
 	updateCartItem,
 	removeCartItem,
 } = require('../services/cartService');
+const {
+	addCartItemValidator,
+	updateCartItemValidator,
+	cartItemIdValidator,
+	getCartByUserIdValidator,
+} = require('../utils/validation/cartValidation');
 
-router.get('/:userId', getCartByUserId);
-router.post('/items', addItemToCart);
-router.put('/items/:id', updateCartItem);
-router.delete('/items/:id', removeCartItem);
+router.get('/:userId', getCartByUserIdValidator, getCartByUserId);
+router.post('/items', addCartItemValidator, addItemToCart);
+router.put('/items/:id', updateCartItemValidator, updateCartItem);
+router.delete('/items/:id', cartItemIdValidator, removeCartItem);
 
 module.exports = router;
