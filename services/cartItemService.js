@@ -77,7 +77,6 @@ const updateCartItem = async (cartItemId, quantity) => {
 
 module.exports = {
     addCartItem,
-    getCartItems,
     deleteCartItem,
     updateCartItem
 }

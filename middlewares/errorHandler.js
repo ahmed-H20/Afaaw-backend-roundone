@@ -1,4 +1,5 @@
-import AppError from "../errors/appError.js";
+const AppError = require("../errors/appError")
+
 
 const errorHandler = (error, req, res, next) => {
 
@@ -17,4 +18,4 @@ const errorHandler = (error, req, res, next) => {
     });
 };
 
-export default errorHandler;
+module.exports = errorHandler;

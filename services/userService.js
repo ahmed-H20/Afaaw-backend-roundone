@@ -8,7 +8,7 @@ const registerService = async (fullName,email,password)=>{
     }
     const newUser = await userRepository.createUser(fullName,email,password);
     
-    return {user:newUser}
+    return {user:newUser, message:"User registered successfully"}
 }
 
 module.exports = {
