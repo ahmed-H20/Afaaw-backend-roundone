@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const User = require("./models/userModels");
 const productRoute = require("./routes/productRoute");
+const userRoute = require("./routes/userRoutes");
+const cartRoute = require("./routes/cartRoutes");
+const errorHandler = require("./middlewares/errorHandler");
 
 dotenv.config();
 const app = express();
@@ -19,6 +22,10 @@ const startServer = async () => {
     await connectDB();
 
     app.use("/api/v1/products", productRoute);
+    app.use("/api/users", userRoute);
+    app.use("/api/cart", cartRoute);
+    app.use("/api/category", cartRoute);
+    app.use(errorHandler)
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
