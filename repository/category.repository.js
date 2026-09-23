@@ -1,3 +1,5 @@
+const Categories = require("../models/categories")
+
 const categoryRepository = {
     addCategory: async (name) => {
         return await Categories.create({ name })
