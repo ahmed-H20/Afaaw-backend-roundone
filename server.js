@@ -5,6 +5,7 @@ const User = require("./models/userModels");
 const productRoute = require("./routes/productRoute");
 const userRoute = require("./routes/userRoutes");
 const cartRoute = require("./routes/cartRoutes");
+const categoryRoute = require("./routes/categoryRoute");
 const errorHandler = require("./middlewares/errorHandler");
 
 dotenv.config();
@@ -24,7 +25,7 @@ const startServer = async () => {
     app.use("/api/v1/products", productRoute);
     app.use("/api/users", userRoute);
     app.use("/api/cart", cartRoute);
-    app.use("/api/category", cartRoute);
+    app.use("/api/category", categoryRoute);
     app.use(errorHandler)
 
     app.listen(PORT, () => {
