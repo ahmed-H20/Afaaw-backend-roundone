@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middlewares/validate");
 
 const {
   createReview,
@@ -7,8 +8,22 @@ const {
   getReviewsByUserId,
 } = require("../controllers/reviewController");
 
-router.post("/", createReview);
-router.get("/user/:userId", getReviewsByUserId);
-router.get("/:productId", getReviewsByProductId);
+const {
+  createReviewSchema,
+  reviewUserParams,
+  reviewProductParams,
+} = require("../validations/review.validation");
+
+router.post("/", validate({ body: createReviewSchema }), createReview);
+router.get(
+  "/user/:userId",
+  validate({ params: reviewUserParams }),
+  getReviewsByUserId,
+);
+router.get(
+  "/:productId",
+  validate({ params: reviewProductParams }),
+  getReviewsByProductId,
+);
 
 module.exports = router;

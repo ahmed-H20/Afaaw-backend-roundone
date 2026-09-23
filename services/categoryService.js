@@ -1,27 +1,17 @@
 const Category = require("../models/categories");
 const Product = require("../models/productsModel");
-
-// Helper to build an error the controller can turn into a status code
-const httpError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const ApiError = require("../utils/ApiError");
 
 // Turn a duplicate-key error from the unique name index into a 409
 const rethrowDuplicate = (error) => {
   if (error.code === 11000) {
-    throw httpError("A category with this name already exists", 409);
+    throw ApiError.conflict("A category with this name already exists");
   }
   throw error;
 };
 
 // Create a new category
 const createCategory = async (data) => {
-  if (!data || !data.name || !data.name.trim()) {
-    throw httpError("Category name is required", 400);
-  }
-
   try {
     return await Category.create({ name: data.name });
   } catch (error) {
@@ -38,7 +28,7 @@ const getAllCategories = async () => {
 const getCategoryById = async (id) => {
   const category = await Category.findById(id);
   if (!category) {
-    throw httpError("Category not found", 404);
+    throw ApiError.notFound("Category not found");
   }
   return category;
 };
@@ -51,10 +41,6 @@ const getProductsByCategory = async (id) => {
 
 // Rename a category
 const updateCategory = async (id, data) => {
-  if (!data || !data.name || !data.name.trim()) {
-    throw httpError("Category name is required", 400);
-  }
-
   try {
     const category = await Category.findByIdAndUpdate(
       id,
@@ -62,7 +48,7 @@ const updateCategory = async (id, data) => {
       { new: true, runValidators: true },
     );
     if (!category) {
-      throw httpError("Category not found", 404);
+      throw ApiError.notFound("Category not found");
     }
     return category;
   } catch (error) {
@@ -74,15 +60,14 @@ const updateCategory = async (id, data) => {
 const deleteCategory = async (id) => {
   const inUse = await Product.countDocuments({ category: id });
   if (inUse > 0) {
-    throw httpError(
+    throw ApiError.conflict(
       `Cannot delete: ${inUse} product(s) still use this category`,
-      409,
     );
   }
 
   const category = await Category.findByIdAndDelete(id);
   if (!category) {
-    throw httpError("Category not found", 404);
+    throw ApiError.notFound("Category not found");
   }
   return category;
 };

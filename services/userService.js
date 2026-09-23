@@ -1,11 +1,5 @@
-const User = require("../models/userModel");
-
-// Helper to build an error the controller can turn into a status code
-const httpError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const User = require("../models/userModels");
+const ApiError = require("../utils/ApiError");
 
 // Create a new user
 const createUser = async (data) => {
@@ -21,7 +15,7 @@ const getAllUsers = async () => {
 const getUserById = async (id) => {
   const user = await User.findById(id);
   if (!user) {
-    throw httpError("User not found", 404);
+    throw ApiError.notFound("User not found");
   }
   return user;
 };
@@ -33,7 +27,7 @@ const updateUser = async (id, data) => {
     runValidators: true,
   });
   if (!user) {
-    throw httpError("User not found", 404);
+    throw ApiError.notFound("User not found");
   }
   return user;
 };
@@ -42,7 +36,7 @@ const updateUser = async (id, data) => {
 const deleteUser = async (id) => {
   const user = await User.findByIdAndDelete(id);
   if (!user) {
-    throw httpError("User not found", 404);
+    throw ApiError.notFound("User not found");
   }
   return user;
 };

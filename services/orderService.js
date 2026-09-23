@@ -3,13 +3,7 @@ const OrderItem = require("../models/orderItemsModel");
 const Cart = require("../models/cartModel");
 const CartItem = require("../models/cartItemsModel");
 const Product = require("../models/productsModel");
-
-// Helper to build an error the controller can turn into a status code
-const httpError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const ApiError = require("../utils/ApiError");
 
 // Which statuses each status is allowed to move to.
 const STATUS_TRANSITIONS = {
@@ -40,12 +34,12 @@ const createOrder = async (userId) => {
     : [];
 
   if (cartItems.length === 0) {
-    throw httpError("Cart is empty", 400);
+    throw ApiError.badRequest("Cart is empty");
   }
 
   const missing = cartItems.find((item) => !item.productId);
   if (missing) {
-    throw httpError("A product in your cart is no longer available", 400);
+    throw ApiError.badRequest("A product in your cart is no longer available");
   }
 
   // Reserve stock one line at a time. The { stock: { $gte } } condition makes
@@ -60,7 +54,7 @@ const createOrder = async (userId) => {
 
     if (!product) {
       await restock(reserved);
-      throw httpError(`Not enough stock for ${item.productId.name}`, 400);
+      throw ApiError.badRequest(`Not enough stock for ${item.productId.name}`);
     }
 
     reserved.push({ productId: item.productId._id, quantity: item.quantity });
@@ -112,7 +106,7 @@ const getOrderById = async (userId, orderId) => {
   // Scoped to userId so one user can't read another user's order.
   const order = await Order.findOne({ _id: orderId, userId });
   if (!order) {
-    throw httpError("Order not found", 404);
+    throw ApiError.notFound("Order not found");
   }
 
   const items = await OrderItem.find({ orderId: order._id });
@@ -128,7 +122,7 @@ const getAllOrders = async () => {
 // Pass userId to restrict the change to that user's own order.
 const changeStatus = async (orderId, newStatus, userId) => {
   if (!STATUS_TRANSITIONS[newStatus]) {
-    throw httpError(`Invalid status: ${newStatus}`, 400);
+    throw ApiError.badRequest(`Invalid status: ${newStatus}`);
   }
 
   const allowedFrom = Object.keys(STATUS_TRANSITIONS).filter((status) =>
@@ -153,11 +147,10 @@ const changeStatus = async (orderId, newStatus, userId) => {
       userId ? { _id: orderId, userId } : { _id: orderId },
     );
     if (!existing) {
-      throw httpError("Order not found", 404);
+      throw ApiError.notFound("Order not found");
     }
-    throw httpError(
+    throw ApiError.badRequest(
       `Cannot change order from ${existing.status} to ${newStatus}`,
-      400,
     );
   }
 

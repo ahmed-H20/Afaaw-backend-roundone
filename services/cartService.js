@@ -1,13 +1,7 @@
 const Cart = require("../models/cartModel");
 const CartItem = require("../models/cartItemsModel");
 const Product = require("../models/productsModel");
-
-// Helper to build an error the controller can turn into a status code
-const httpError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const ApiError = require("../utils/ApiError");
 
 // One cart per user, created on first touch instead of at signup.
 // The upsert is atomic, so two concurrent requests can't both insert.
@@ -33,7 +27,7 @@ const findOwnedItem = async (userId, itemId) => {
   const cart = await getOrCreateCart(userId);
   const item = await CartItem.findOne({ _id: itemId, cartId: cart._id });
   if (!item) {
-    throw httpError("Cart item not found", 404);
+    throw ApiError.notFound("Cart item not found");
   }
   return item;
 };
@@ -57,17 +51,9 @@ const getCart = async (userId) => {
 
 // Add a product to the cart, merging with a matching line if one exists
 const addItem = async (userId, { productId, quantity = 1, color, size }) => {
-  if (!productId) {
-    throw httpError("Product id is required", 400);
-  }
-
-  if (!Number.isInteger(quantity) || quantity < 1) {
-    throw httpError("Quantity must be a whole number of at least 1", 400);
-  }
-
   const product = await Product.findById(productId);
   if (!product) {
-    throw httpError("Product not found", 404);
+    throw ApiError.notFound("Product not found");
   }
 
   const cart = await getOrCreateCart(userId);
@@ -83,7 +69,7 @@ const addItem = async (userId, { productId, quantity = 1, color, size }) => {
   // Stock is checked against the resulting total, not just the added amount.
   const newQuantity = existing ? existing.quantity + quantity : quantity;
   if (newQuantity > product.stock) {
-    throw httpError(`Only ${product.stock} left in stock`, 400);
+    throw ApiError.badRequest(`Only ${product.stock} left in stock`);
   }
 
   if (existing) {
@@ -102,19 +88,15 @@ const addItem = async (userId, { productId, quantity = 1, color, size }) => {
 
 // Set a cart item to an exact quantity
 const updateItemQuantity = async (userId, itemId, quantity) => {
-  if (!Number.isInteger(quantity) || quantity < 1) {
-    throw httpError("Quantity must be a whole number of at least 1", 400);
-  }
-
   const item = await findOwnedItem(userId, itemId);
 
   const product = await Product.findById(item.productId);
   if (!product) {
-    throw httpError("Product not found", 404);
+    throw ApiError.notFound("Product not found");
   }
 
   if (quantity > product.stock) {
-    throw httpError(`Only ${product.stock} left in stock`, 400);
+    throw ApiError.badRequest(`Only ${product.stock} left in stock`);
   }
 
   item.quantity = quantity;

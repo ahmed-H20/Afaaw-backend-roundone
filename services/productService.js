@@ -1,11 +1,5 @@
 const Product = require("../models/productsModel");
-
-// Helper to build an error the controller can turn into a status code
-const httpError = (message, statusCode) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
+const ApiError = require("../utils/ApiError");
 
 // Create a new product
 const createProduct = async (data) => {
@@ -21,7 +15,7 @@ const getAllProducts = async () => {
 const getProductById = async (id) => {
   const product = await Product.findById(id);
   if (!product) {
-    throw httpError("Product not found", 404);
+    throw ApiError.notFound("Product not found");
   }
   return product;
 };
@@ -33,7 +27,7 @@ const updateProduct = async (id, data) => {
     runValidators: true,
   });
   if (!product) {
-    throw httpError("Product not found", 404);
+    throw ApiError.notFound("Product not found");
   }
   return product;
 };
@@ -42,7 +36,7 @@ const updateProduct = async (id, data) => {
 const deleteProduct = async (id) => {
   const product = await Product.findByIdAndDelete(id);
   if (!product) {
-    throw httpError("Product not found", 404);
+    throw ApiError.notFound("Product not found");
   }
   return product;
 };

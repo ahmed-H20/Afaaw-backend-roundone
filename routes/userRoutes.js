@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middlewares/validate");
 
 const {
   createUser,
@@ -9,10 +10,20 @@ const {
   deleteUser,
 } = require("../controllers/userController");
 
-router.post("/", createUser);
+const {
+  createUserSchema,
+  updateUserSchema,
+  userParams,
+} = require("../validations/user.validation");
+
+router.post("/", validate({ body: createUserSchema }), createUser);
 router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.get("/:id", validate({ params: userParams }), getUserById);
+router.put(
+  "/:id",
+  validate({ params: userParams, body: updateUserSchema }),
+  updateUser,
+);
+router.delete("/:id", validate({ params: userParams }), deleteUser);
 
 module.exports = router;

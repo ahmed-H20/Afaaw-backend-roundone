@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middlewares/validate");
 
 const {
   createCategory,
@@ -10,11 +11,25 @@ const {
   deleteCategory,
 } = require("../controllers/categoryController");
 
-router.post("/", createCategory);
+const {
+  createCategorySchema,
+  updateCategorySchema,
+  categoryParams,
+} = require("../validations/category.validation");
+
+router.post("/", validate({ body: createCategorySchema }), createCategory);
 router.get("/", getAllCategories);
-router.get("/:id", getCategoryById);
-router.get("/:id/products", getProductsByCategory);
-router.put("/:id", updateCategory);
-router.delete("/:id", deleteCategory);
+router.get("/:id", validate({ params: categoryParams }), getCategoryById);
+router.get(
+  "/:id/products",
+  validate({ params: categoryParams }),
+  getProductsByCategory,
+);
+router.put(
+  "/:id",
+  validate({ params: categoryParams, body: updateCategorySchema }),
+  updateCategory,
+);
+router.delete("/:id", validate({ params: categoryParams }), deleteCategory);
 
 module.exports = router;
