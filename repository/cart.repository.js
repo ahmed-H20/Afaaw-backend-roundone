@@ -1,3 +1,5 @@
+const Cart = require("../models/cartModel");
+
 const cartRepository = {
     getCartByUserId: async (userId) => {
         return await Cart.findOne({ userId: userId });
