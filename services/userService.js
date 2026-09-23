@@ -2,7 +2,7 @@ const AppError = require("../errors/appError");
 const userRepository = require("../repository/user.repository");
 
 const registerService = async (fullName,email,password)=>{
-    const existedEmail = await userRepository.findUserByEmail(email);
+    const existedEmail = await userRepository.getUserByEmail(email);
     if(existedEmail) {
         throw new AppError("Email already exists",400)
     }
