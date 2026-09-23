@@ -41,6 +41,7 @@
     "escape-html": "^1.0.3",
     "etag": "^1.8.1",
     "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
     "fill-range": "^7.1.1",
     "finalhandler": "^2.1.1",
     "forwarded": "^0.2.0",
@@ -117,7 +118,8 @@
     "vary": "^1.1.2",
     "webidl-conversions": "^7.0.0",
     "whatwg-url": "^14.2.0",
-    "wrappy": "^1.0.2"
+    "wrappy": "^1.0.2",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "jest": "^30.5.2",
