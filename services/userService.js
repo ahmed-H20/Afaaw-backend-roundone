@@ -1,42 +1,27 @@
-const userController = require("../controllers/userController");
-const asyncHandler = require("express-async-handler");
+const User = require("../models/userModels");
 const ApiError = require("../utils/ApiError");
 
-exports.getAllUsers = asyncHandler(async (req, res) => {
-  const users = await userController.findAll();
-  res.status(200).json(users);
-});
+exports.getAllUsers = () => User.find();
 
-exports.getUserById = asyncHandler(async (req, res) => {
-  const user = await userController.findById(req.params.id);
-  if (!user) {
-    throw new ApiError("User not found", 404);
-  }
-  res.status(200).json(user);
-});
+exports.getUserById = async (id) => {
+  const user = await User.findById(id);
+  if (!user) throw new ApiError("User not found", 404);
+  return user;
+};
 
-exports.createUser = asyncHandler(async (req, res) => {
-  const { name, email } = req.body;
-  const user = await userController.create({ name, email });
-  res.status(201).json(user);
-});
+exports.createUser = (data) => User.create(data);
 
-exports.updateUser = asyncHandler(async (req, res) => {
-  const { name, email } = req.body;
-  const user = await userController.updateById(req.params.id, {
-    name,
-    email,
+exports.updateUser = async (id, data) => {
+  const user = await User.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
   });
-  if (!user) {
-    throw new ApiError("User not found", 404);
-  }
-  res.status(200).json(user);
-});
+  if (!user) throw new ApiError("User not found", 404);
+  return user;
+};
 
-exports.deleteUser = asyncHandler(async (req, res) => {
-  const user = await userController.deleteById(req.params.id);
-  if (!user) {
-    throw new ApiError("User not found", 404);
-  }
-  res.status(200).json({ message: "User deleted successfully" });
-});
+exports.deleteUser = async (id) => {
+  const user = await User.findByIdAndDelete(id);
+  if (!user) throw new ApiError("User not found", 404);
+  return { message: "User deleted successfully" };
+};

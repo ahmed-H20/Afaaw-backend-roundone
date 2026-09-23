@@ -1,20 +1,22 @@
-const Order = require("../models/orderModel");
-const OrderItems = require("../models/orderItemsModel");
-const CartItems = require("../models/cartItemsModel");
-
-exports.findAll = () => Order.find({ isDeleted: false }).populate("userId");
-exports.findItemsByOrderId = (orderId) => OrderItems.findOne({ orderId, isDeleted: false });
-exports.findByUserId = (id) => Order.find({ id, isDeleted: false });
-exports.create = (data) => Order.create(data);
-exports.createItems = (items) => OrderItems.insertMany(items);
-exports.clearCart = (cartId) => CartItems.deleteMany({ cartId });
-exports.updateStatus = (id, status) => Order.findOneAndUpdate(
-  { id, isDeleted: false },
-  { status },
-  { new: true },
+const asyncHandler = require("express-async-handler");
+const service = require("../services/orderService");
+exports.getAllOrders = asyncHandler(async (req, res) =>
+  res.status(200).json(await service.getAllOrders()),
 );
-exports.softDelete = (id) => Order.findOneAndUpdate(
-  { id, isDeleted: false },
-  { isDeleted: true },
-  { new: true },
+exports.getOrderItems = asyncHandler(async (req, res) =>
+  res.status(200).json(await service.getOrderItems(req.params.orderId)),
+);
+exports.getAllOrdersByUser = asyncHandler(async (req, res) =>
+  res.status(200).json(await service.getAllOrdersByUser(req.params.id)),
+);
+exports.createOrder = asyncHandler(async (req, res) =>
+  res.status(201).json(await service.createOrder(req.user.id, req.body.items)),
+);
+exports.updateOrderStatus = asyncHandler(async (req, res) =>
+  res
+    .status(200)
+    .json(await service.updateOrderStatus(req.params.id, req.body.status)),
+);
+exports.softDeleteOrder = asyncHandler(async (req, res) =>
+  res.status(200).json(await service.softDeleteOrder(req.params.id)),
 );

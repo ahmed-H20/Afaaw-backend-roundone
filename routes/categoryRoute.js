@@ -6,7 +6,7 @@ const {
   getAllCategories,
   getCategoryById,
   getAllProductsByCategory,
-} = require("../services/categoryService");
+} = require("../controllers/categoryController");
 const {
   createCategoryValidator,
   getCategoryValidator,

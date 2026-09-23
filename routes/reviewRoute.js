@@ -3,7 +3,7 @@ const {
   createReview,
   getReviewsByProductId,
   getReviewsByUserId,
-} = require("../services/reviewService");
+} = require("../controllers/reviewController");
 const {
   createReviewValidator,
   getReviewsByProductValidator,

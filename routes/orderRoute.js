@@ -6,7 +6,7 @@ const {
   createOrder,
   updateOrderStatus,
   softDeleteOrder,
-} = require("../services/orderService");
+} = require("../controllers/orderController");
 const {
   getOrdersByUserValidator,
   createOrderValidator,

@@ -6,7 +6,7 @@ const {
   addProduct,
   removeProduct,
   changeProductQuantity,
-} = require("../services/cartService");
+} = require("../controllers/cartController");
 const {
   getCartValidator,
   getCartItemsValidator,

@@ -1,54 +1,38 @@
-const orderController = require("../controllers/orderController");
-const asyncHandler = require("express-async-handler");
+const Order = require("../models/orderModel");
+const OrderItems = require("../models/orderItemsModel");
 const ApiError = require("../utils/ApiError");
 
-exports.getAllOrders = asyncHandler(async (req, res) => {
-  const orders = await orderController.findAll();
-  res.status(200).json(orders);
-});
-
-exports.getOrderItems = asyncHandler(async (req, res) => {
-  const orderItems = await orderController.findItemsByOrderId(
-    req.params.orderId,
+exports.getAllOrders = () =>
+  Order.find({ isDeleted: false }).populate("userId");
+exports.getOrderItems = async (orderId) => {
+  const items = await OrderItems.find({ orderId });
+  if (!items) throw new ApiError("order not found", 404);
+  return items;
+};
+exports.getAllOrdersByUser = (userId) =>
+  Order.find({ userId, isDeleted: false });
+exports.createOrder = async (userId, items) => {
+  const order = await Order.create({ userId });
+  const orderItems = await OrderItems.insertMany(
+    items.map((item) => ({ ...item, orderId: order._id })),
   );
-  if (!orderItems) {
-    throw new ApiError("order not found", 404);
-  }
-  res.status(200).json(orderItems);
-});
-
-exports.getAllOrdersByUser = asyncHandler(async (req, res) => {
-  const id = req.params.id;
-  const orders = await orderController.findByUserId(id);
-  res.status(200).json(orders);
-});
-
-exports.createOrder = asyncHandler(async (req, res) => {
-  const { items } = req.body;
-
-  const order = await orderController.create({ userId: req.user.id });
-  const orderItems = await orderController.createItems(order._id, items);
-  await orderController.clearCart(cart._id);
-
-  res.status(201).json({ order, items: orderItems });
-});
-
-exports.updateOrderStatus = asyncHandler(async (req, res) => {
-  const id = req.params.id;
-  const { status } = req.body;
-  const order = await orderController.updateStatus(id, status);
-  if (!order) {
-    throw new ApiError("Order not found", 404);
-  }
-  res.status(201).json(order);
-});
-
-exports.softDeleteOrder = asyncHandler(async (req, res) => {
-  const id = req.params.id;
-
-  const order = await orderController.softDelete(id);
-  if (!order) {
-    throw new ApiError("Order not found", 404);
-  }
-  res.status(201).json(order);
-});
+  return { order, items: orderItems };
+};
+exports.updateOrderStatus = async (id, status) => {
+  const order = await Order.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { status },
+    { new: true },
+  );
+  if (!order) throw new ApiError("Order not found", 404);
+  return order;
+};
+exports.softDeleteOrder = async (id) => {
+  const order = await Order.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!order) throw new ApiError("Order not found", 404);
+  return order;
+};
