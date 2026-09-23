@@ -7,18 +7,24 @@ const {
   updateCategory,
   deleteCategory,
 } = require("../controllers/category.controller");
+const validate = require("../middleware/validate.middleware");
+const {
+  createCategorySchema,
+  updateCategorySchema,
+  categoryIdSchema,
+} = require("../validations/category.validation");
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(createCategory)
+  .post(validate(createCategorySchema), createCategory)
   .get(getAllCategories);
 
 router
   .route("/:id")
-  .get(getCategoryById)
-  .put(updateCategory)
-  .delete(deleteCategory);
+  .get(validate(categoryIdSchema), getCategoryById)
+  .put(validate(updateCategorySchema), updateCategory)
+  .delete(validate(categoryIdSchema), deleteCategory);
 
 module.exports = router;

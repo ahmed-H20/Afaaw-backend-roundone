@@ -7,18 +7,24 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/user.controller");
+const validate = require("../middleware/validate.middleware");
+const {
+  createUserSchema,
+  updateUserSchema,
+  userIdSchema,
+} = require("../validations/user.validation");
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(createUser)
+  .post(validate(createUserSchema), createUser)
   .get(getAllUsers);
 
 router
   .route("/:id")
-  .get(getUserById)
-  .put(updateUser)
-  .delete(deleteUser);
+  .get(validate(userIdSchema), getUserById)
+  .put(validate(updateUserSchema), updateUser)
+  .delete(validate(userIdSchema), deleteUser);
 
 module.exports = router;
