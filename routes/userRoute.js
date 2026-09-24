@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const {
+  createUserValidation,
+  updateUserValidation,
+  userIdValidation,
+} = require("../utils/validations/userValidation");
 
 const {
   createUser,
@@ -9,10 +14,10 @@ const {
   deleteUser,
 } = require("../services/userService");
 
-router.post("/", createUser);
+router.post("/", createUserValidation, createUser);
 router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.get("/:id", userIdValidation, getUserById);
+router.put("/:id", userIdValidation, updateUserValidation, updateUser);
+router.delete("/:id", userIdValidation, deleteUser);
 
 module.exports = router;

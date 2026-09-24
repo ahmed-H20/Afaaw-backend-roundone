@@ -1,5 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const {
+  createCategoryValidation,
+  categoryIdValidation,
+} = require("../utils/validations/categoryValidation");
 
 const {
   createCategory,
@@ -8,9 +12,9 @@ const {
   updateCategory,
 } = require("../services/categoryService");
 
-router.post("/", createCategory);
+router.post("/", createCategoryValidation, createCategory);
 router.get("/", getAllCategories);
-router.get("/:id", getCategoryById);
-router.put("/:id", updateCategory);
+router.get("/:id", categoryIdValidation, getCategoryById);
+router.put("/:id", categoryIdValidation, updateCategory);
 
 module.exports = router;

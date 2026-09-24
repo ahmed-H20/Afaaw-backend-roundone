@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const validationMiddleware = require("../../middlewares/validationMiddleware");
 
 const createProductValidation = [
@@ -19,4 +19,13 @@ const createProductValidation = [
   validationMiddleware,
 ];
 
-module.exports = { createProductValidation };
+const productIdValidation = [
+  param("id")
+    .notEmpty()
+    .withMessage("Product ID is required")
+    .isMongoId()
+    .withMessage("Invalid product ID"),
+  validationMiddleware,
+];
+
+module.exports = { createProductValidation, productIdValidation };

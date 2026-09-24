@@ -1,5 +1,6 @@
 const Product = require("../models/productsModel");
 const asyncHandler = require("express-async-handler");
+const ApiError = require("../utils/ApiError");
 
 // @desc Create a new product
 // @route POST /api/products
@@ -23,7 +24,7 @@ const getAllProducts = asyncHandler(async (req, res, next) => {
 const getProductById = asyncHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+    return next(new ApiError("Product not found", 404));
   }
   res.status(200).json({ product });
 });
@@ -36,7 +37,7 @@ const updateProduct = asyncHandler(async (req, res, next) => {
     new: true,
   });
   if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+    return next(new ApiError("Product not found", 404));
   }
   res.status(200).json({ message: "Product updated successfully", product });
 });
@@ -47,7 +48,7 @@ const updateProduct = asyncHandler(async (req, res, next) => {
 const deleteProduct = asyncHandler(async (req, res, next) => {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+    return next(new ApiError("Product not found", 404));
   }
   res.status(200).json({ message: "Product deleted successfully" });
 });

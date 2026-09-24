@@ -1,3 +1,5 @@
+// client sent bad data → 400, stop before the service
+
 const { validationResult } = require("express-validator");
 
 const validationMiddleware = (req, res, next) => {

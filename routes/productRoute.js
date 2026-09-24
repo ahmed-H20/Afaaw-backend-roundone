@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   createProductValidation,
+  productIdValidation,
 } = require("../utils/validations/productValidation");
 
 const {
@@ -12,10 +13,11 @@ const {
   deleteProduct,
 } = require("../services/productService");
 
+// createProductValidation > validationMiddleware > asyncHandler > globalErrorHandler
 router.post("/", createProductValidation, createProduct);
 router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+router.get("/:id", productIdValidation, getProductById);
+router.put("/:id", productIdValidation, updateProduct);
+router.delete("/:id", productIdValidation, deleteProduct);
 
 module.exports = router;

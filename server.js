@@ -43,7 +43,7 @@ const startServer = async () => {
       next(new ApiError(`Not Found - ${req.originalUrl}`, 404));
     });
 
-    // for all errors, global error handling (express error handling middleware)
+    // for all errors, "any uncaught errors", global error handling (express error handling middleware)
     // app.use((err, req, res, next) => {
     //   console.log(err);
     //   res.status(err.statusCode || 500).json({
