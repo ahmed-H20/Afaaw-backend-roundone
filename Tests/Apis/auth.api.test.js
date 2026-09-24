@@ -8,11 +8,13 @@ afterEach(async () => {
 
 describe("Auth API", () => {
   describe("POST /api/auth/register", () => {
-    it("should register a new user and return a token", async () => {
+    it("should register a new user and return an access token", async () => {
       const response = await axios.post(`${baseURL}/api/auth/register`, {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       expect(response.status).toBe(201);
@@ -24,8 +26,8 @@ describe("Auth API", () => {
       expect(response.data.data.user.email).toBe("mohamed@example.com");
       expect(response.data.data.user.password).toBeUndefined();
 
-      expect(response.data.data.token).toBeDefined();
-      expect(typeof response.data.data.token).toBe("string");
+      expect(response.data.data.accessToken).toBeDefined();
+      expect(typeof response.data.data.accessToken).toBe("string");
 
       const user = await User.findOne({
         email: "mohamed@example.com",
@@ -40,6 +42,8 @@ describe("Auth API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       try {
@@ -47,6 +51,8 @@ describe("Auth API", () => {
           fullName: "Another User",
           email: "mohamed@example.com",
           password: "password456",
+          phone: "+201001234568",
+          address: "Giza, Egypt",
         });
       } catch (error) {
         expect(error.response.status).toBe(409);
@@ -56,11 +62,13 @@ describe("Auth API", () => {
   });
 
   describe("POST /api/auth/login", () => {
-    it("should login with valid credentials and return a token", async () => {
+    it("should login with valid credentials and return an access token", async () => {
       await axios.post(`${baseURL}/api/auth/register`, {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       const response = await axios.post(`${baseURL}/api/auth/login`, {
@@ -76,8 +84,8 @@ describe("Auth API", () => {
       expect(response.data.data.user.email).toBe("mohamed@example.com");
       expect(response.data.data.user.password).toBeUndefined();
 
-      expect(response.data.data.token).toBeDefined();
-      expect(typeof response.data.data.token).toBe("string");
+      expect(response.data.data.accessToken).toBeDefined();
+      expect(typeof response.data.data.accessToken).toBe("string");
     });
 
     it("should reject invalid password", async () => {
@@ -85,6 +93,8 @@ describe("Auth API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       try {

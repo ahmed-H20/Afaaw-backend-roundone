@@ -6,13 +6,11 @@ const httpStatusText = require("../constants/httpStatusText");
 // @access Public
 const createUser = async (req, res) => {
   const user = await userService.createUser(req.body);
-  const userResponse = user.toObject();
-  delete userResponse.password;
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
     message: "User created successfully",
-    data: { user: userResponse },
+    data: { user },
   });
 };
 

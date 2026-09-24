@@ -24,7 +24,7 @@ const reviewSchema = new mongoose.Schema(
       maxlength: [200, "Comment cannot exceed 200 characters"],
     },
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
 
 reviewSchema.index({ userId: 1, productId: 1 }, { unique: true });

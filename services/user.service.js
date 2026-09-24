@@ -4,12 +4,7 @@ const ApiError = require("../utils/ApiError");
 const httpStatusText = require("../constants/httpStatusText");
 
 const createUser = async (data) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-
-  return await User.create({
-    ...data,
-    password: hashedPassword,
-  });
+  return await User.create(data);
 };
 
 const getAllUsers = async () => {
@@ -27,13 +22,7 @@ const getUserById = async (id) => {
 };
 
 const updateUser = async (id, data) => {
-  const updateData = { ...data };
-
-  if (updateData.password) {
-    updateData.password = await bcrypt.hash(updateData.password, 10);
-  }
-
-  const user = await User.findByIdAndUpdate(id, updateData, {
+  const user = await User.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   }).select("-password");
@@ -55,8 +44,14 @@ const deleteUser = async (id) => {
   return user;
 };
 
-const getUserByEmail = async (email) => {
-  return await User.findOne({ email });
+const getUserByEmail = async (email, includePassword = false) => {
+  const query = User.findOne({ email });
+
+  if (includePassword) {
+    query.select("+password");
+  }
+
+  return await query;
 };
 
 const comparePassword = async (password, hashedPassword) => {

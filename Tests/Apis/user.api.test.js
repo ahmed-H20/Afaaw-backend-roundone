@@ -12,6 +12,8 @@ describe("User API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       expect(response.status).toBe(201);
@@ -29,12 +31,16 @@ describe("User API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       await User.create({
         fullName: "Ahmed Ali",
         email: "ahmed@example.com",
         password: "password456",
+        phone: "+201001234568",
+        address: "Giza, Egypt",
       });
 
       const response = await axios.get(`${baseURL}/api/users`);
@@ -54,6 +60,8 @@ describe("User API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       const response = await axios.get(`${baseURL}/api/users/${user._id}`);
@@ -74,6 +82,8 @@ describe("User API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       const response = await axios.put(`${baseURL}/api/users/${user._id}`, {
@@ -95,6 +105,8 @@ describe("User API", () => {
         fullName: "Mohamed Ayman",
         email: "mohamed@example.com",
         password: "password123",
+        phone: "+201001234567",
+        address: "Cairo, Egypt",
       });
 
       const response = await axios.delete(`${baseURL}/api/users/${user._id}`);

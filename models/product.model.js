@@ -27,7 +27,7 @@ const productSchema = new mongoose.Schema(
       required: [true, "Category is required"],
     },
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
 
 const Product = mongoose.model("Product", productSchema);

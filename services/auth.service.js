@@ -12,41 +12,39 @@ const register = async (data) => {
 
   const user = await userService.createUser(data);
 
-  const token = generateToken(user._id.toString());
-
-  const userResponse = user.toObject();
-  delete userResponse.password;
+  const accessToken = generateToken(user._id.toString());
 
   return {
-    user: userResponse,
-    token,
+    user,
+    accessToken,
   };
 };
 
 const login = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
+  const user = await userService.getUserByEmail(email, true);
 
   if (!user) {
     throw new ApiError(401, "Invalid email or password", httpStatusText.FAIL);
   }
 
+  if (!user.isActive) {
+    throw new ApiError(403, "Account is inactive", httpStatusText.FAIL);
+  }
+
   const isPasswordValid = await userService.comparePassword(
     password,
-    user.password
+    user.password,
   );
 
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid email or password", httpStatusText.FAIL);
   }
 
-  const token = generateToken(user._id.toString());
-
-  const userResponse = user.toObject();
-  delete userResponse.password;
+  const accessToken = generateToken(user._id.toString());
 
   return {
-    user: userResponse,
-    token,
+    user,
+    accessToken,
   };
 };
 

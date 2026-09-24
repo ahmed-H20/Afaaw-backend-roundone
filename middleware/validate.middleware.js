@@ -4,7 +4,7 @@ const { FAIL } = require("../constants/httpStatusText");
 const validate = (schema) => {
   return (req, res, next) => {
     const result = schema.safeParse({
-      body: req.body,
+      body: req.body ?? {},
       params: req.params,
       query: req.query,
     });

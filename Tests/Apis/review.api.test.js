@@ -21,6 +21,8 @@ describe("Review API", () => {
       fullName: "Mohamed Ayman",
       email: "mohamed@example.com",
       password: "password123",
+      phone: "+201001234567",
+      address: "Cairo, Egypt",
     });
 
     category = await Category.create({
