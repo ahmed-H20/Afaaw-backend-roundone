@@ -1,11 +1,8 @@
-const mongoose = require("mongoose");
-const axios = require("axios");
-const dotenv = require("dotenv");
-
-dotenv.config();
-
-const app = require("../../app");
-const Product = require("../../models/productsModel");
+import mongoose from "mongoose";
+import axios from "axios";
+import "dotenv/config";
+import app from "../../app.js";
+import Product from "../../models/product.model.js";
 
 let server;
 let baseURL;

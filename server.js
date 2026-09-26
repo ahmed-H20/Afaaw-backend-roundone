@@ -1,31 +1,21 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const productRoute = require("./routes/productRoute");
+import "dotenv/config";
+import { pathToFileURL } from "node:url";
+import app from "./app.js";
+import connectDB from "./config/database.js";
 
-dotenv.config();
-const app = express();
-app.use(express.json());
+export const startServer = async () => {
+  await connectDB();
 
-const PORT = process.env.PORT || 3000;
-
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
-
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    app.use("/api/v1/products", productRoute);
-
-    app.listen(PORT, () => {
-      console.info(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
+  const port = process.env.PORT || 5000;
+  return app.listen(port, () => {
+    console.info(`Server is running on port ${port}`);
+  });
 };
 
-startServer();
+// This check ensures that the server starts only when this file is run directly, not when it's imported as a module.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  startServer().catch((error) => {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  });
+}
