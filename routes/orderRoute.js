@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const {
+  createOrderValidation,
+  orderIdValidation,
+  updateOrderValidation,
+} = require("../utils/validations/orderValidation");
 
 const {
   createOrder,
@@ -9,10 +14,10 @@ const {
   deleteOrder,
 } = require("../services/orderService");
 
-router.post("/", createOrder);
+router.post("/", createOrderValidation, createOrder);
 router.get("/", getAllOrders);
-router.get("/:id", getOrderById);
-router.put("/:id", updateOrder);
-router.delete("/:id", deleteOrder);
+router.get("/:id", orderIdValidation, getOrderById);
+router.put("/:id", orderIdValidation, updateOrderValidation, updateOrder);
+router.delete("/:id", orderIdValidation, deleteOrder);
 
 module.exports = router;

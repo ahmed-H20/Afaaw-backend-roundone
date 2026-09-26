@@ -1,5 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const {
+  createCartValidation,
+  cartByUserIdValidation,
+  cartIdValidation,
+} = require("../utils/validations/cartValidation");
 
 const {
   createCart,
@@ -10,11 +15,11 @@ const {
   deleteCart,
 } = require("../services/cartService");
 
-router.post("/", createCart);
+router.post("/", createCartValidation, createCart);
 router.get("/", getAllCarts);
-router.get("/:id", getCartById);
-router.get("/user/:id", getCartByUserId);
-router.put("/:id", updateCart);
-router.delete("/:id", deleteCart);
+router.get("/user/:userId", cartByUserIdValidation, getCartByUserId);
+router.get("/:id", cartIdValidation, getCartById);
+router.put("/:id", cartIdValidation, updateCart);
+router.delete("/:id", cartIdValidation, deleteCart);
 
 module.exports = router;
