@@ -1,7 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const User = require("./models/userModels");
 const productRoute = require("./routes/productRoute");
 
 dotenv.config();
@@ -21,7 +20,7 @@ const startServer = async () => {
     app.use("/api/v1/products", productRoute);
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.info(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
