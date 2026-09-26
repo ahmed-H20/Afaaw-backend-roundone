@@ -17,7 +17,14 @@ const categoryIdValidation = [
   validationMiddleware,
 ];
 
+const updateCategoryValidation = [
+  body("name").notEmpty().withMessage("Name is required").isString(),
+
+  validationMiddleware,
+];
+
 module.exports = {
   createCategoryValidation,
   categoryIdValidation,
+  updateCategoryValidation,
 };

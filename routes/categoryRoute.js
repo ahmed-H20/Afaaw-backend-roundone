@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createCategoryValidation,
   categoryIdValidation,
+  updateCategoryValidation,
 } = require("../utils/validations/categoryValidation");
 
 const {
@@ -15,6 +16,11 @@ const {
 router.post("/", createCategoryValidation, createCategory);
 router.get("/", getAllCategories);
 router.get("/:id", categoryIdValidation, getCategoryById);
-router.put("/:id", categoryIdValidation, updateCategory);
+router.put(
+  "/:id",
+  categoryIdValidation,
+  updateCategoryValidation,
+  updateCategory,
+);
 
 module.exports = router;
