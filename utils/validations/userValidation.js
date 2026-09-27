@@ -3,8 +3,16 @@ const validationMiddleware = require("../../middlewares/validationMiddleware");
 
 const createUserValidation = [
   body("fullName").notEmpty().withMessage("Name is required"),
-  body("email").notEmpty().withMessage("Email is required").isEmail(),
-  body("password").notEmpty().withMessage("Password is required"),
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .unique({ collection: "users" }),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long"),
 
   validationMiddleware,
 ];
