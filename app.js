@@ -5,12 +5,13 @@ const cartRoute = require("./routes/cartRoute");
 const orderRoute = require("./routes/orderRoute");
 const reviewRoute = require("./routes/reviewRoute");
 const userRoute = require("./routes/userRoute");
+const authRoute = require("./routes/authRoute");
 
 const app = express();
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("Hello, World!");
+  res.send("Hello, World!");
 });
 
 app.use("/api/products", productRoute);
@@ -19,5 +20,6 @@ app.use("/api/carts", cartRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/users", userRoute);
+app.use("/api/auth", authRoute);
 
 module.exports = app;

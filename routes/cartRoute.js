@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const {
   getAllCarts,
   getOneCartByUser,
@@ -17,11 +18,21 @@ const {
 
 const router = express.Router();
 
-router.get("/", getAllCarts);
-router.get("/cart/:userId", getCartValidator, getOneCartByUser);
-router.get("/cartItems/:cartId", getCartItemsValidator, getCartItems);
-router.post("/", addProductValidator, addProduct);
-router.patch("/", changeProductQuantityValidator, changeProductQuantity);
-router.delete("/", removeProductValidator, removeProduct);
+router.get("/", authenticate, authorize("admin"), getAllCarts);
+router.get("/cart/:userId", authenticate, getCartValidator, getOneCartByUser);
+router.get(
+  "/cartItems/:cartId",
+  authenticate,
+  getCartItemsValidator,
+  getCartItems,
+);
+router.post("/", authenticate, addProductValidator, addProduct);
+router.patch(
+  "/",
+  authenticate,
+  changeProductQuantityValidator,
+  changeProductQuantity,
+);
+router.delete("/", authenticate, removeProductValidator, removeProduct);
 
 module.exports = router;

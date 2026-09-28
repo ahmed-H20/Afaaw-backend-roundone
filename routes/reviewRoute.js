@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticate } = require("../middlewares/auth.middleware");
 const {
   createReview,
   getReviewsByProductId,
@@ -12,8 +13,17 @@ const {
 
 const router = express.Router();
 
-router.post("/", createReviewValidator, createReview);
-router.get("/product/:productId", getReviewsByProductValidator, getReviewsByProductId);
-router.get("/user/:userId", getReviewsByUserValidator, getReviewsByUserId);
+router.post("/", authenticate, createReviewValidator, createReview);
+router.get(
+  "/product/:productId",
+  getReviewsByProductValidator,
+  getReviewsByProductId,
+);
+router.get(
+  "/user/:userId",
+  authenticate,
+  getReviewsByUserValidator,
+  getReviewsByUserId,
+);
 
 module.exports = router;

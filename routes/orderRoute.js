@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const {
   getAllOrders,
   getOrderItems,
@@ -13,15 +14,29 @@ const {
   updateOrderStatusValidator,
   deleteOrderValidator,
 } = require("../utils/validators/order.validator");
-const { getOrderItemsValidator } = require("../utils/validators/orderItems.validator");
+const {
+  getOrderItemsValidator,
+} = require("../utils/validators/orderItems.validator");
 
 const router = express.Router();
 
-router.get("/", getAllOrders);
-router.get("/:id", getOrdersByUserValidator, getAllOrdersByUser);
-router.post("/", createOrderValidator, createOrder);
-router.get("/:orderId", getOrderItemsValidator, getOrderItems);
-router.patch("/:id/status", updateOrderStatusValidator, updateOrderStatus);
-router.delete("/:id", deleteOrderValidator, softDeleteOrder);
+router.get("/", authenticate, authorize("admin"), getAllOrders);
+router.get("/:id", authenticate, getOrdersByUserValidator, getAllOrdersByUser);
+router.post("/", authenticate, createOrderValidator, createOrder);
+router.get("/:orderId", authenticate, getOrderItemsValidator, getOrderItems);
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize("admin"),
+  updateOrderStatusValidator,
+  updateOrderStatus,
+);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  deleteOrderValidator,
+  softDeleteOrder,
+);
 
 module.exports = router;

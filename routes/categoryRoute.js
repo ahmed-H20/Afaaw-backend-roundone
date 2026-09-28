@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const router = express.Router();
 
 const {
@@ -13,9 +14,20 @@ const {
   getCategoryProductsValidator,
 } = require("../utils/validators/category.validator");
 
-router.route("/").get(getAllCategories).post(createCategoryValidator, createCategory);
-router.get("/:id/products", getCategoryProductsValidator, getAllProductsByCategory);
+router
+  .route("/")
+  .get(getAllCategories)
+  .post(
+    authenticate,
+    authorize("admin"),
+    createCategoryValidator,
+    createCategory,
+  );
+router.get(
+  "/:id/products",
+  getCategoryProductsValidator,
+  getAllProductsByCategory,
+);
 router.get("/:id", getCategoryValidator, getCategoryById);
 
 module.exports = router;
-
