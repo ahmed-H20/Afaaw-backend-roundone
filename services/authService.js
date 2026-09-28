@@ -83,7 +83,7 @@ const allowedTo =
   async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new ApiError("You donot have permission to access this route"),
+        new ApiError("You do not have permission to access this route"),
       );
     }
     next();

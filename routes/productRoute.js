@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   createProductValidator,
-} = require("../utils/Validations/PproductValidation");
+} = require("../utils/Validations/productValidation");
 const router = express.Router();
 
 const {
