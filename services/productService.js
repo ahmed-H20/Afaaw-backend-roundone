@@ -1,32 +1,21 @@
 const Product = require("../models/productsModel");
+const asyncHandler = require("express-async-handler");
 
 // @desc Create a new product
 // @route POST /api/products
 // @access Admin
-const createProduct = async (req, res, next) => {
-  try {
-    console.log(req.body)
-    const product = await Product.create(req.body);
-    res.status(201).json({ message: "Product created successfully", product });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating product" });
-  }
-};
+const createProduct = asyncHandler(async (req, res, next) => {
+  const product = await Product.create(req.body);
+  res.status(201).json({ message: "Product created successfully", product });
+});
 
 // @desc Get all products
 // @route GET /api/products
 // @access Public
-const getAllProducts = async (req, res, next) => {
-  try {
-    const products = await Product.find();
-    res.status(200).json({ products });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching products" });
-  }
-};
-
+const getAllProducts = asyncHandler(async (req, res, next) => {
+  const products = await Product.find();
+  res.status(200).json({ products });
+});
 // @desc Get a product by ID
 // @route GET /api/products/:id
 // @access Public

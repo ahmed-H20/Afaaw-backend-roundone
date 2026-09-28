@@ -1,16 +1,20 @@
 const express = require("express");
+const {
+  createProductValidator,
+} = require("../utils/Validations/PproductValidation");
 const router = express.Router();
 
 const {
-    createProduct,
-    getAllProducts,
-    getProductById,
-    updateProduct,
-    deleteProduct,
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
 } = require("../services/productService");
+const { protect, allowedTo } = require("../services/authService");
 
-router.post("/", createProduct);
-router.get("/", getAllProducts);
+router.post("/", createProductValidator, createProduct);
+router.get("/", protect, allowedTo("admin"), getAllProducts);
 router.get("/:id", getProductById);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
