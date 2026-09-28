@@ -1,17 +1,19 @@
 const mongoose = require("mongoose");
 
-const orderItemsSchema = new mongoose.Schema(
+const cartItemSchema = new mongoose.Schema(
   {
-    quantity: Number,
+    quantity: { type: Number, required: true, min: 1, default: 1 },
     color: String,
     size: String,
     cartId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Cart",
+      required: true,
     },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
+      required: true,
     },
   },
   {
@@ -19,4 +21,8 @@ const orderItemsSchema = new mongoose.Schema(
   },
 );
 
-export const OrderItems = mongoose.model("OrderItems", orderItemsSchema);
+// Every cart read filters on cartId.
+cartItemSchema.index({ cartId: 1 });
+
+const CartItem = mongoose.model("CartItem", cartItemSchema);
+module.exports = CartItem;

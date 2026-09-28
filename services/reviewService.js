@@ -1,52 +1,25 @@
-// @desc Create a new review
-// @route POST /api/reviews
-// @access User
-const createReview = async (req, res, next) => {
-  try {
-    if (!req.body) {
-      return res.status(400).json({ message: "Review data is required" });
-    }
+const Review = require("../models/reviewsModel");
 
-    if (req.body.rating < 1 || req.body.rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be between 1 and 5" });
-    }
+// Shape checks (rating range, comment length, id format) live in
+// validations/review.validation.js and run before this is called.
 
-    if (!req.body.comment) {
-      return res.status(400).json({ message: "Comment is required" });
-    }
-
-    const review = new Review.create(req.body);
-    res.status(201).json({ message: "Review created successfully", review });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating review" });
-  }
+// Create a new review
+const createReview = async (data) => {
+  return await Review.create(data);
 };
 
-// @desc Get all reviews for a product
-// @route GET /api/reviews/:productId
-// @access Public
-const getReviewsByProductId = async (req, res, next) => {
-  try {
-    const reviews = await Review.find({ productId: req.params.productId });
-    res.status(200).json({ reviews });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching reviews" });
-  }
+// Get all reviews for a product
+const getReviewsByProductId = async (productId) => {
+  return await Review.find({ productId });
 };
 
-// @desc Get all reviews by a user
-// @route GET /api/reviews/user/:userId
-// @access User
-const getReviewsByUserId = async (req, res, next) => {
-  try {
-    const reviews = await Review.find({ userId: req.params.userId });
-    res.status(200).json({ reviews });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching reviews" });
-  }
+// Get all reviews written by a user
+const getReviewsByUserId = async (userId) => {
+  return await Review.find({ userId });
+};
+
+module.exports = {
+  createReview,
+  getReviewsByProductId,
+  getReviewsByUserId,
 };

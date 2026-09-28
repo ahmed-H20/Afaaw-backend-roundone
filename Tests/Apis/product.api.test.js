@@ -32,7 +32,7 @@ afterAll(async () => {
   });
 });
 
-describe("POST /api/products", () => {
+describe("POST /api/v1/products", () => {
   it("should create a product", async () => {
     const productData = {
       name: "Keyboard",
@@ -41,7 +41,7 @@ describe("POST /api/products", () => {
     };
 
     try {
-      const response = await axios.post(`${baseURL}/api/products`, productData);
+      const response = await axios.post(`${baseURL}/api/v1/products`, productData);
       expect(response.status).toBe(201);
     } catch (error) {
       console.log("STATUS:", error.response?.status);

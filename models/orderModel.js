@@ -12,8 +12,15 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
+    // Stored, not derived: it's the amount the user agreed to pay at checkout.
+    totalPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
   { timestamps: true },
 );
 
 const Order = mongoose.model("Order", orderSchema);
+module.exports = Order;
