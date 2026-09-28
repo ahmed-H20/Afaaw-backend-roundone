@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
+const protect = require("../middlewares/protect");
+const restrictTo = require("../middlewares/restrictTo");
 
 const {
   createCategory,
@@ -17,7 +19,13 @@ const {
   categoryParams,
 } = require("../validations/category.validation");
 
-router.post("/", validate({ body: createCategorySchema }), createCategory);
+router.post(
+  "/",
+  protect,
+  restrictTo("admin"),
+  validate({ body: createCategorySchema }),
+  createCategory,
+);
 router.get("/", getAllCategories);
 router.get("/:id", validate({ params: categoryParams }), getCategoryById);
 router.get(
@@ -27,9 +35,17 @@ router.get(
 );
 router.put(
   "/:id",
+  protect,
+  restrictTo("admin"),
   validate({ params: categoryParams, body: updateCategorySchema }),
   updateCategory,
 );
-router.delete("/:id", validate({ params: categoryParams }), deleteCategory);
+router.delete(
+  "/:id",
+  protect,
+  restrictTo("admin"),
+  validate({ params: categoryParams }),
+  deleteCategory,
+);
 
 module.exports = router;

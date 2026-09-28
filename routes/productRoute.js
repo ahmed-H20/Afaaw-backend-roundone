@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
+const protect = require("../middlewares/protect");
+const restrictTo = require("../middlewares/restrictTo");
 
 const {
   createProduct,
@@ -16,14 +18,30 @@ const {
   productParams,
 } = require("../validations/product.validation");
 
-router.post("/", validate({ body: createProductSchema }), createProduct);
+// Chain order: authenticate -> authorize -> validate -> controller.
+// An anonymous request gets a flat 401 rather than a 400 that leaks the schema.
+router.post(
+  "/",
+  protect,
+  restrictTo("admin"),
+  validate({ body: createProductSchema }),
+  createProduct,
+);
 router.get("/", getAllProducts);
 router.get("/:id", validate({ params: productParams }), getProductById);
 router.put(
   "/:id",
+  protect,
+  restrictTo("admin"),
   validate({ params: productParams, body: updateProductSchema }),
   updateProduct,
 );
-router.delete("/:id", validate({ params: productParams }), deleteProduct);
+router.delete(
+  "/:id",
+  protect,
+  restrictTo("admin"),
+  validate({ params: productParams }),
+  deleteProduct,
+);
 
 module.exports = router;

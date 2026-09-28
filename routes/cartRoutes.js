@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
+const protect = require("../middlewares/protect");
 
 const {
   getCart,
@@ -13,28 +14,23 @@ const {
 const {
   addItemSchema,
   updateQuantitySchema,
-  cartParams,
-  cartItemParams,
+  itemParams,
 } = require("../validations/cart.validations");
 
-router.get("/:userId", validate({ params: cartParams }), getCart);
-router.delete("/:userId", validate({ params: cartParams }), clearCart);
+// Every route here acts on the caller's own cart - the owner comes from the
+// token, so there is no :userId in any path.
+router.use(protect);
+
+router.get("/", getCart);
+router.delete("/", clearCart);
 
 // Items nest under the cart - a cart item has no meaning outside one.
-router.post(
-  "/:userId/items",
-  validate({ params: cartParams, body: addItemSchema }),
-  addItem,
-);
+router.post("/items", validate({ body: addItemSchema }), addItem);
 router.put(
-  "/:userId/items/:itemId",
-  validate({ params: cartItemParams, body: updateQuantitySchema }),
+  "/items/:itemId",
+  validate({ params: itemParams, body: updateQuantitySchema }),
   updateItemQuantity,
 );
-router.delete(
-  "/:userId/items/:itemId",
-  validate({ params: cartItemParams }),
-  removeItem,
-);
+router.delete("/items/:itemId", validate({ params: itemParams }), removeItem);
 
 module.exports = router;

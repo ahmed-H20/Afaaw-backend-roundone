@@ -1,11 +1,11 @@
 const cartService = require("../services/cartService");
 
-// TODO: once auth middleware exists, take the user from req.user.id
-// instead of the URL so a client can't act on someone else's cart.
-const getUserId = (req) => req.validated.params.userId;
+// The owner comes from the verified token, never the URL - a client cannot
+// act on someone else's cart.
+const getUserId = (req) => req.user.id;
 
 // @desc Get the current user's cart with its items and subtotal
-// @route GET /api/carts/:userId
+// @route GET /api/carts
 // @access User
 const getCart = async (req, res) => {
   const cart = await cartService.getCart(getUserId(req));
@@ -13,7 +13,7 @@ const getCart = async (req, res) => {
 };
 
 // @desc Add a product to the cart
-// @route POST /api/carts/:userId/items
+// @route POST /api/carts/items
 // @access User
 const addItem = async (req, res) => {
   const item = await cartService.addItem(getUserId(req), req.validated.body);
@@ -21,7 +21,7 @@ const addItem = async (req, res) => {
 };
 
 // @desc Set a cart item to an exact quantity
-// @route PUT /api/carts/:userId/items/:itemId
+// @route PUT /api/carts/items/:itemId
 // @access User
 const updateItemQuantity = async (req, res) => {
   const item = await cartService.updateItemQuantity(
@@ -33,7 +33,7 @@ const updateItemQuantity = async (req, res) => {
 };
 
 // @desc Remove a single item from the cart
-// @route DELETE /api/carts/:userId/items/:itemId
+// @route DELETE /api/carts/items/:itemId
 // @access User
 const removeItem = async (req, res) => {
   await cartService.removeItem(getUserId(req), req.validated.params.itemId);
@@ -41,7 +41,7 @@ const removeItem = async (req, res) => {
 };
 
 // @desc Empty the cart
-// @route DELETE /api/carts/:userId
+// @route DELETE /api/carts
 // @access User
 const clearCart = async (req, res) => {
   const { deletedCount } = await cartService.clearCart(getUserId(req));

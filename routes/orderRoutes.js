@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
+const protect = require("../middlewares/protect");
+const restrictTo = require("../middlewares/restrictTo");
 
 const {
   createOrder,
-  getUserOrders,
+  getMyOrders,
   getOrderById,
   cancelOrder,
   getAllOrders,
@@ -13,30 +15,28 @@ const {
 
 const {
   updateStatusSchema,
-  orderUserParams,
   orderIdParams,
-  orderUserAndIdParams,
 } = require("../validations/order.validation");
 
+// No anonymous access to any order.
+router.use(protect);
+
 // Admin
-router.get("/", getAllOrders);
+router.get("/", restrictTo("admin"), getAllOrders);
 router.patch(
   "/:orderId/status",
+  restrictTo("admin"),
   validate({ params: orderIdParams, body: updateStatusSchema }),
   updateOrderStatus,
 );
 
-// User
-router.post("/:userId", validate({ params: orderUserParams }), createOrder);
-router.get("/:userId", validate({ params: orderUserParams }), getUserOrders);
-router.get(
-  "/:userId/:orderId",
-  validate({ params: orderUserAndIdParams }),
-  getOrderById,
-);
+// User - "/me" must be declared before "/:orderId" or it gets matched as an id.
+router.post("/", createOrder);
+router.get("/me", getMyOrders);
+router.get("/:orderId", validate({ params: orderIdParams }), getOrderById);
 router.patch(
-  "/:userId/:orderId/cancel",
-  validate({ params: orderUserAndIdParams }),
+  "/:orderId/cancel",
+  validate({ params: orderIdParams }),
   cancelOrder,
 );
 

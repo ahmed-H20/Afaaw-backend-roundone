@@ -19,12 +19,12 @@ const updateQuantitySchema = z.strictObject({
     .min(1, "Quantity must be at least 1"),
 });
 
-const cartParams = idParams("userId");
-const cartItemParams = idParams("userId", "itemId");
+// The cart owner comes from the token, never the URL - so only the item id
+// is still a path param.
+const itemParams = idParams("itemId");
 
 module.exports = {
   addItemSchema,
   updateQuantitySchema,
-  cartParams,
-  cartItemParams,
+  itemParams,
 };

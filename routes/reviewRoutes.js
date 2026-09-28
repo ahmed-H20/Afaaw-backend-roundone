@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
+const protect = require("../middlewares/protect");
 
 const {
   createReview,
@@ -14,7 +15,8 @@ const {
   reviewProductParams,
 } = require("../validations/review.validation");
 
-router.post("/", validate({ body: createReviewSchema }), createReview);
+// Writing a review needs a login; reading them does not.
+router.post("/", protect, validate({ body: createReviewSchema }), createReview);
 router.get(
   "/user/:userId",
   validate({ params: reviewUserParams }),

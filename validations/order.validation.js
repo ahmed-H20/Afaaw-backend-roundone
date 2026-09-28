@@ -14,14 +14,11 @@ const updateStatusSchema = z.strictObject({
   status: z.enum(ORDER_STATUSES),
 });
 
-const orderUserParams = idParams("userId");
+// The order owner comes from the token, never the URL.
 const orderIdParams = idParams("orderId");
-const orderUserAndIdParams = idParams("userId", "orderId");
 
 module.exports = {
   ORDER_STATUSES,
   updateStatusSchema,
-  orderUserParams,
   orderIdParams,
-  orderUserAndIdParams,
 };

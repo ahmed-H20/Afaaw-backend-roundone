@@ -1,15 +1,20 @@
 const reviewService = require("../services/reviewService");
 
 // @desc Create a new review
-// @route POST /api/reviews
+// @route POST /api/v1/reviews
 // @access User
 const createReview = async (req, res) => {
-  const review = await reviewService.createReview(req.validated.body);
+  // The author comes from the token, not the body - otherwise a client could
+  // post a review as somebody else.
+  const review = await reviewService.createReview({
+    ...req.validated.body,
+    userId: req.user.id,
+  });
   res.status(201).json({ message: "Review created successfully", review });
 };
 
 // @desc Get all reviews for a product
-// @route GET /api/reviews/:productId
+// @route GET /api/v1/reviews/:productId
 // @access Public
 const getReviewsByProductId = async (req, res) => {
   const reviews = await reviewService.getReviewsByProductId(
@@ -19,8 +24,8 @@ const getReviewsByProductId = async (req, res) => {
 };
 
 // @desc Get all reviews written by a user
-// @route GET /api/reviews/user/:userId
-// @access User
+// @route GET /api/v1/reviews/user/:userId
+// @access Public
 const getReviewsByUserId = async (req, res) => {
   const reviews = await reviewService.getReviewsByUserId(
     req.validated.params.userId,

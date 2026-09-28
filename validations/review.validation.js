@@ -1,8 +1,9 @@
 const { z } = require("zod");
 const { objectId, idParams } = require("./common");
 
+// No userId: the author comes from the token, or anyone could post a review
+// as somebody else.
 const createReviewSchema = z.strictObject({
-  userId: objectId,
   productId: objectId,
   rating: z
     .number()

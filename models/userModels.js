@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema(
     // select: false keeps the hash out of every query by default.
     // Reading it back needs an explicit .select("+password").
     password: { type: String, required: true, trim: true, select: false },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
   {
     timestamps: true,
