@@ -5,14 +5,18 @@ const userRoute = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const cookieParser = require("cookie-parser");
+const authRoutes = require("./routes/authRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorHandeler");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/users", userRoute);
