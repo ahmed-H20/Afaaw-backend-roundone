@@ -12,6 +12,7 @@ const {
 } = require("../services/productItemService");
 
 const validate = require("../middlewares/validation.middleware");
+const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
 const {
   createProductItemSchema,
@@ -20,12 +21,7 @@ const {
   updateProductItemSchema,
 } = require("../validations/productItem.validation");
 
-productItemRouter.post(
-  "/",
-  validate(createProductItemSchema),
-  createProductItem
-);
-
+// Public routes
 productItemRouter.get("/", getAllProductItems);
 
 productItemRouter.get(
@@ -40,14 +36,27 @@ productItemRouter.get(
   getProductItemById
 );
 
+// Admin restricted routes
+productItemRouter.post(
+  "/",
+  protect,
+  allowedTo("admin"),
+  validate(createProductItemSchema),
+  createProductItem
+);
+
 productItemRouter.put(
   "/:id",
+  protect,
+  allowedTo("admin"),
   validate(updateProductItemSchema),
   updateProductItem
 );
 
 productItemRouter.delete(
   "/:id",
+  protect,
+  allowedTo("admin"),
   validate(productItemIdSchema),
   deleteProductItem
 );

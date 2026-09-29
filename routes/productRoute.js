@@ -11,6 +11,7 @@ const {
 } = require("../services/productService");
 
 const validate = require("../middlewares/validation.middleware");
+const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
 const {
   createProductSchema,
@@ -18,28 +19,31 @@ const {
   updateProductSchema,
 } = require("../validations/product.validation");
 
+// Public routes
+productRouter.get("/", getAllProducts);
+productRouter.get("/:id", validate(productIdSchema), getProductById);
+
+// Admin restricted routes
 productRouter.post(
   "/",
+  protect,
+  allowedTo("admin"),
   validate(createProductSchema),
   createProduct
 );
 
-productRouter.get("/", getAllProducts);
-
-productRouter.get(
-  "/:id",
-  validate(productIdSchema),
-  getProductById
-);
-
 productRouter.put(
   "/:id",
+  protect,
+  allowedTo("admin"),
   validate(updateProductSchema),
   updateProduct
 );
 
 productRouter.delete(
   "/:id",
+  protect,
+  allowedTo("admin"),
   validate(productIdSchema),
   deleteProduct
 );

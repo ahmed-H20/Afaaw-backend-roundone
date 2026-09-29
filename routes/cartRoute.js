@@ -12,6 +12,7 @@ const {
 } = require("../services/cartService");
 
 const validate = require("../middlewares/validation.middleware");
+const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
 const {
   createCartSchema,
@@ -20,34 +21,41 @@ const {
   updateCartSchema,
 } = require("../validations/cart.validation");
 
+// Admin only: view all carts
+cartRouter.get("/", protect, allowedTo("admin"), getAllCarts);
+
+// Authenticated user/admin routes
 cartRouter.post(
   "/",
+  protect,
   validate(createCartSchema),
   createCart
 );
 
-cartRouter.get("/", getAllCarts);
-
 cartRouter.get(
   "/user/:userId",
+  protect,
   validate(userIdSchema),
   getCartByUserId
 );
 
 cartRouter.get(
   "/:id",
+  protect,
   validate(cartIdSchema),
   getCartById
 );
 
 cartRouter.put(
   "/:id",
+  protect,
   validate(updateCartSchema),
   updateCart
 );
 
 cartRouter.delete(
   "/:id",
+  protect,
   validate(cartIdSchema),
   deleteCart
 );

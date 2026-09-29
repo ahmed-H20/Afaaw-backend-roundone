@@ -1,12 +1,20 @@
 const User = require("../models/userModels");
 const AppError = require("../errors/AppError");
+const bcrypt = require("bcryptjs");
 
 // @desc Create a new user
 // @route POST /api/users
-// @access Public
+// @access Admin
 const createUser = async (req, res, next) => {
   try {
-    const user = await User.create(req.body);
+    const userData = { ...req.body };
+    if (!userData.username) {
+      userData.username = userData.email
+        ? userData.email.split("@")[0]
+        : `user_${Date.now()}`;
+    }
+
+    const user = await User.create(userData);
 
     res.status(201).json({
       message: "User created successfully",
@@ -19,7 +27,7 @@ const createUser = async (req, res, next) => {
 
 // @desc Get all users
 // @route GET /api/users
-// @access Public / Admin
+// @access Admin
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();
@@ -32,7 +40,7 @@ const getAllUsers = async (req, res, next) => {
 
 // @desc Get a user by ID
 // @route GET /api/users/:id
-// @access Public / Admin
+// @access Admin / User
 const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -49,14 +57,20 @@ const getUserById = async (req, res, next) => {
 
 // @desc Update a user
 // @route PUT /api/users/:id
-// @access Public / Admin
+// @access Admin / User
 const updateUser = async (req, res, next) => {
   try {
+    const updateData = { ...req.body };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 12);
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       {
         new: true,
+        runValidators: true,
       }
     );
 
@@ -75,7 +89,7 @@ const updateUser = async (req, res, next) => {
 
 // @desc Delete a user
 // @route DELETE /api/users/:id
-// @access Public / Admin
+// @access Admin
 const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);

@@ -9,6 +9,7 @@ const {
 } = require("../services/reviewService");
 
 const validate = require("../middlewares/validation.middleware");
+const { protect } = require("../middlewares/auth.middleware");
 
 const {
   createReviewSchema,
@@ -16,20 +17,24 @@ const {
   userIdSchema,
 } = require("../validations/review.validation");
 
-reviewRouter.post(
-  "/",
-  validate(createReviewSchema),
-  createReview
-);
-
+// Public route: view reviews of a product
 reviewRouter.get(
   "/product/:productId",
   validate(productIdSchema),
   getReviewsByProductId
 );
 
+// Authenticated user routes
+reviewRouter.post(
+  "/",
+  protect,
+  validate(createReviewSchema),
+  createReview
+);
+
 reviewRouter.get(
   "/user/:userId",
+  protect,
   validate(userIdSchema),
   getReviewsByUserId
 );

@@ -1,6 +1,9 @@
 const express = require("express");
 const userRouter = express.Router();
+
 const validate = require("../middlewares/validation.middleware");
+const { protect, allowedTo } = require("../middlewares/auth.middleware");
+
 const {
   createUserSchema,
   userIdSchema,
@@ -15,10 +18,28 @@ const {
   deleteUser,
 } = require("../services/userService");
 
-userRouter.post("/",validate(createUserSchema), createUser);
-userRouter.get("/", getAllUsers);
-userRouter.get("/:id",  validate(userIdSchema), getUserById);
-userRouter.put("/:id", validate(updateUserSchema),updateUser);
-userRouter.delete("/:id",validate(userIdSchema), deleteUser);
+// Admin only: create a new user and list all users
+userRouter.post(
+  "/",
+  protect,
+  allowedTo("admin"),
+  validate(createUserSchema),
+  createUser
+);
+
+userRouter.get("/", protect, allowedTo("admin"), getAllUsers);
+
+// Authenticated user/admin routes
+userRouter.get("/:id", protect, validate(userIdSchema), getUserById);
+userRouter.put("/:id", protect, validate(updateUserSchema), updateUser);
+
+// Admin only: delete a user
+userRouter.delete(
+  "/:id",
+  protect,
+  allowedTo("admin"),
+  validate(userIdSchema),
+  deleteUser
+);
 
 module.exports = userRouter;
