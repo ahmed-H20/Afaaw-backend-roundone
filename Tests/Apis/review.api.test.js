@@ -4,6 +4,7 @@ const Review = require("../../models/review.model");
 const User = require("../../models/user.model");
 const Product = require("../../models/product.model");
 const Category = require("../../models/category.model");
+const { generateToken } = require("../../utils/jwt");
 afterEach(async () => {
   await Review.deleteMany({});
   await Product.deleteMany({});
@@ -13,6 +14,7 @@ afterEach(async () => {
 
 describe("Review API", () => {
   let user;
+  let userOptions;
   let category;
   let product;
 
@@ -24,6 +26,11 @@ describe("Review API", () => {
       phone: "+201001234567",
       address: "Cairo, Egypt",
     });
+    userOptions = {
+      headers: {
+        Authorization: `Bearer ${generateToken(user._id.toString())}`,
+      },
+    };
 
     category = await Category.create({
       name: "Electronics",
@@ -44,7 +51,7 @@ describe("Review API", () => {
         productId: product._id,
         rating: 5,
         comment: "Excellent product",
-      });
+      }, userOptions);
 
       expect(response.status).toBe(201);
       expect(response.data.data.review).toBeDefined();

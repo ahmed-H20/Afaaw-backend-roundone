@@ -1,16 +1,40 @@
 const axios = require("axios");
 
 const Category = require("../../models/category.model");
+const User = require("../../models/user.model");
+const roles = require("../../constants/roles");
+const { generateToken } = require("../../utils/jwt");
 afterEach(async () => {
   await Category.deleteMany({});
+  await User.deleteMany({});
 });
 
 describe("Category API", () => {
+  let adminOptions;
+
+  beforeEach(async () => {
+    const admin = await User.create({
+      fullName: "Admin User",
+      email: "admin@example.com",
+      password: "password123",
+      phone: "+201001234567",
+      address: "Cairo, Egypt",
+      role: roles.ADMIN,
+    });
+    adminOptions = {
+      headers: {
+        Authorization: `Bearer ${generateToken(admin._id.toString())}`,
+      },
+    };
+  });
+
   describe("POST /api/categories", () => {
     it("should create a category", async () => {
-      const response = await axios.post(`${baseURL}/api/categories`, {
-        name: "Electronics",
-      });
+      const response = await axios.post(
+        `${baseURL}/api/categories`,
+        { name: "Electronics" },
+        adminOptions,
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.data.category).toBeDefined();
@@ -66,6 +90,7 @@ describe("Category API", () => {
         {
           name: "Updated Electronics",
         },
+        adminOptions,
       );
 
       expect(response.status).toBe(200);
@@ -82,6 +107,7 @@ describe("Category API", () => {
 
       const response = await axios.delete(
         `${baseURL}/api/categories/${category._id}`,
+        adminOptions,
       );
 
       expect(response.status).toBe(200);

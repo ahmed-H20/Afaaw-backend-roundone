@@ -2,6 +2,7 @@ const axios = require("axios");
 
 const Cart = require("../../models/cart.model");
 const User = require("../../models/user.model");
+const { generateToken } = require("../../utils/jwt");
 afterEach(async () => {
   await Cart.deleteMany({});
   await User.deleteMany({});
@@ -9,6 +10,7 @@ afterEach(async () => {
 
 describe("Cart API", () => {
   let user;
+  let authOptions;
 
   beforeEach(async () => {
     user = await User.create({
@@ -18,13 +20,20 @@ describe("Cart API", () => {
       phone: "+201001234567",
       address: "Cairo, Egypt",
     });
+    authOptions = {
+      headers: {
+        Authorization: `Bearer ${generateToken(user._id.toString())}`,
+      },
+    };
   });
 
   describe("POST /api/carts", () => {
     it("should create a cart", async () => {
-      const response = await axios.post(`${baseURL}/api/carts`, {
-        userId: user._id,
-      });
+      const response = await axios.post(
+        `${baseURL}/api/carts`,
+        { userId: user._id },
+        authOptions,
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.data.cart).toBeDefined();
@@ -38,7 +47,7 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(`${baseURL}/api/carts`);
+      const response = await axios.get(`${baseURL}/api/carts`, authOptions);
 
       expect(response.status).toBe(200);
       expect(response.data.data.carts).toBeDefined();
@@ -53,7 +62,10 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(`${baseURL}/api/carts/${cart._id}`);
+      const response = await axios.get(
+        `${baseURL}/api/carts/${cart._id}`,
+        authOptions,
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.data.cart).toBeDefined();
@@ -68,9 +80,11 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.put(`${baseURL}/api/carts/${cart._id}`, {
-        userId: user._id,
-      });
+      const response = await axios.put(
+        `${baseURL}/api/carts/${cart._id}`,
+        { userId: user._id },
+        authOptions,
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.data.cart).toBeDefined();
@@ -84,7 +98,10 @@ describe("Cart API", () => {
         userId: user._id,
       });
 
-      const response = await axios.delete(`${baseURL}/api/carts/${cart._id}`);
+      const response = await axios.delete(
+        `${baseURL}/api/carts/${cart._id}`,
+        authOptions,
+      );
 
       expect(response.status).toBe(200);
 

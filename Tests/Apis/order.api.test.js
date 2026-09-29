@@ -2,6 +2,8 @@ const axios = require("axios");
 
 const Order = require("../../models/order.model");
 const User = require("../../models/user.model");
+const roles = require("../../constants/roles");
+const { generateToken } = require("../../utils/jwt");
 afterEach(async () => {
   await Order.deleteMany({});
   await User.deleteMany({});
@@ -9,6 +11,7 @@ afterEach(async () => {
 
 describe("Order API", () => {
   let user;
+  let userOptions;
 
   beforeEach(async () => {
     user = await User.create({
@@ -18,13 +21,20 @@ describe("Order API", () => {
       phone: "+201001234567",
       address: "Cairo, Egypt",
     });
+    userOptions = {
+      headers: {
+        Authorization: `Bearer ${generateToken(user._id.toString())}`,
+      },
+    };
   });
 
   describe("POST /api/orders", () => {
     it("should create an order", async () => {
-      const response = await axios.post(`${baseURL}/api/orders`, {
-        userId: user._id,
-      });
+      const response = await axios.post(
+        `${baseURL}/api/orders`,
+        { userId: user._id },
+        userOptions,
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.data.order).toBeDefined();
@@ -39,7 +49,7 @@ describe("Order API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(`${baseURL}/api/orders`);
+      const response = await axios.get(`${baseURL}/api/orders`, userOptions);
 
       expect(response.status).toBe(200);
       expect(response.data.data.orders).toBeDefined();
@@ -54,7 +64,10 @@ describe("Order API", () => {
         userId: user._id,
       });
 
-      const response = await axios.get(`${baseURL}/api/orders/${order._id}`);
+      const response = await axios.get(
+        `${baseURL}/api/orders/${order._id}`,
+        userOptions,
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.data.order).toBeDefined();
@@ -68,10 +81,26 @@ describe("Order API", () => {
       const order = await Order.create({
         userId: user._id,
       });
-
-      const response = await axios.put(`${baseURL}/api/orders/${order._id}`, {
-        status: "confirmed",
+      const admin = await User.create({
+        fullName: "Admin User",
+        email: "admin@example.com",
+        password: "password123",
+        phone: "+201001234568",
+        address: "Cairo, Egypt",
+        role: roles.ADMIN,
       });
+
+      const response = await axios.put(
+        `${baseURL}/api/orders/${order._id}`,
+        {
+          status: "confirmed",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${generateToken(admin._id.toString())}`,
+          },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.data.order).toBeDefined();
@@ -84,8 +113,23 @@ describe("Order API", () => {
       const order = await Order.create({
         userId: user._id,
       });
+      const admin = await User.create({
+        fullName: "Admin User",
+        email: "admin@example.com",
+        password: "password123",
+        phone: "+201001234568",
+        address: "Cairo, Egypt",
+        role: roles.ADMIN,
+      });
 
-      const response = await axios.delete(`${baseURL}/api/orders/${order._id}`);
+      const response = await axios.delete(
+        `${baseURL}/api/orders/${order._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${generateToken(admin._id.toString())}`,
+          },
+        },
+      );
 
       expect(response.status).toBe(200);
 

@@ -9,6 +9,7 @@ const {
   deleteReview,
 } = require("../controllers/review.controller");
 const validate = require("../middleware/validate.middleware");
+const protect = require("../middleware/auth.middleware");
 const {
   createReviewSchema,
   updateReviewSchema,
@@ -20,7 +21,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(validate(createReviewSchema), createReview)
+  .post(protect, validate(createReviewSchema), createReview)
   .get(getAllReviews);
 
 router

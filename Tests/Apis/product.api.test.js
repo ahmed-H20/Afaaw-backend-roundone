@@ -2,28 +2,50 @@ const axios = require("axios");
 
 const Product = require("../../models/product.model");
 const Category = require("../../models/category.model");
+const User = require("../../models/user.model");
+const roles = require("../../constants/roles");
+const { generateToken } = require("../../utils/jwt");
 afterEach(async () => {
   await Product.deleteMany({});
   await Category.deleteMany({});
+  await User.deleteMany({});
 });
 
 describe("Product API", () => {
   let category;
+  let adminOptions;
 
   beforeEach(async () => {
     category = await Category.create({
       name: "Electronics",
     });
+    const admin = await User.create({
+      fullName: "Admin User",
+      email: "admin@example.com",
+      password: "password123",
+      phone: "+201001234567",
+      address: "Cairo, Egypt",
+      role: roles.ADMIN,
+    });
+    adminOptions = {
+      headers: {
+        Authorization: `Bearer ${generateToken(admin._id.toString())}`,
+      },
+    };
   });
 
   describe("POST /api/products", () => {
     it("should create a product", async () => {
-      const response = await axios.post(`${baseURL}/api/products`, {
-        name: "Keyboard",
-        price: 1500,
-        stock: 20,
-        category: category._id,
-      });
+      const response = await axios.post(
+        `${baseURL}/api/products`,
+        {
+          name: "Keyboard",
+          price: 1500,
+          stock: 20,
+          category: category._id,
+        },
+        adminOptions,
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.data.product).toBeDefined();
@@ -96,6 +118,7 @@ describe("Product API", () => {
           price: 2500,
           stock: 15,
         },
+        adminOptions,
       );
 
       expect(response.status).toBe(200);
@@ -117,6 +140,7 @@ describe("Product API", () => {
 
       const response = await axios.delete(
         `${baseURL}/api/products/${product._id}`,
+        adminOptions,
       );
 
       expect(response.status).toBe(200);

@@ -9,6 +9,8 @@ const {
   deleteCart,
 } = require("../controllers/cart.controller");
 const validate = require("../middleware/validate.middleware");
+const protect = require("../middleware/auth.middleware");
+const authorize = require("../middleware/role.middleware");
 const {
   createCartSchema,
   cartIdSchema,
@@ -18,14 +20,23 @@ const {
 
 const router = express.Router();
 
-router.route("/").post(validate(createCartSchema), createCart).get(getAllCarts);
+router
+  .route("/")
+  .post(protect, validate(createCartSchema), createCart)
+  .get(protect, getAllCarts);
 
-router.route("/user/:userId").get(validate(cartUserIdSchema), getCartByUserId);
+router
+  .route("/user/:userId")
+  .get(
+    protect,
+    validate(cartUserIdSchema),
+    getCartByUserId,
+  );
 
 router
   .route("/:id")
-  .get(validate(cartIdSchema), getCartById)
-  .put(validate(updateCartSchema), updateCart)
-  .delete(validate(cartIdSchema), deleteCart);
+  .get(protect, validate(cartIdSchema), getCartById)
+  .put(protect, validate(updateCartSchema), updateCart)
+  .delete(protect, validate(cartIdSchema), deleteCart);
 
 module.exports = router;

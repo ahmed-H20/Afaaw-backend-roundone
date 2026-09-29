@@ -38,6 +38,17 @@ const getUserById = async (req, res) => {
   });
 };
 
+// @desc Get the current user's profile
+// @route GET /api/users/me
+// @access Authenticated user
+const getCurrentUser = async (req, res) => {
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Current user retrieved successfully",
+    data: { user: req.user },
+  });
+};
+
 // @desc Update a user
 // @route PUT /api/users/:id
 // @access Admin
@@ -46,6 +57,18 @@ const updateUser = async (req, res) => {
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     message: "User updated successfully",
+    data: { user },
+  });
+};
+
+// @desc Update the current user's profile
+// @route PUT /api/users/me
+// @access Authenticated user
+const updateCurrentUser = async (req, res) => {
+  const user = await userService.updateUser(req.user._id, req.body);
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Current user updated successfully",
     data: { user },
   });
 };
@@ -66,6 +89,8 @@ module.exports = {
   createUser,
   getAllUsers,
   getUserById,
+  getCurrentUser,
   updateUser,
+  updateCurrentUser,
   deleteUser,
 };

@@ -40,6 +40,22 @@ const updateUserSchema = z.object({
     ),
 });
 
+const updateProfileSchema = z.object({
+  body: z
+    .object({
+      fullName: userFields.fullName,
+      email: userFields.email,
+      phone: userFields.phone,
+      address: userFields.address,
+      profileImage: userFields.profileImage,
+    })
+    .partial()
+    .refine(
+      (body) => Object.keys(body).length > 0,
+      "At least one field is required",
+    ),
+});
+
 const userIdSchema = z.object({
   params: z.object({ id: objectId }),
 });
@@ -47,5 +63,6 @@ const userIdSchema = z.object({
 module.exports = {
   createUserSchema,
   updateUserSchema,
+  updateProfileSchema,
   userIdSchema,
 };

@@ -15,22 +15,40 @@ const {
   orderIdSchema,
   orderUserIdSchema,
 } = require("../validations/order.validation");
+const protect = require("../middleware/auth.middleware");
+const authorize = require("../middleware/role.middleware");
+const roles = require("../constants/roles");
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(validate(createOrderSchema), createOrder)
-  .get(getAllOrders);
+  .post(protect, validate(createOrderSchema), createOrder)
+  .get(protect, getAllOrders);
 
 router
   .route("/user/:userId")
-  .get(validate(orderUserIdSchema), getOrdersByUserId);
+  .get(
+    protect,
+    authorize(roles.ADMIN),
+    validate(orderUserIdSchema),
+    getOrdersByUserId,
+  );
 
 router
   .route("/:id")
-  .get(validate(orderIdSchema), getOrderById)
-  .put(validate(updateOrderSchema), updateOrder)
-  .delete(validate(orderIdSchema), deleteOrder);
+  .get(protect, validate(orderIdSchema), getOrderById)
+  .put(
+    protect,
+    authorize(roles.ADMIN),
+    validate(updateOrderSchema),
+    updateOrder,
+  )
+  .delete(
+    protect,
+    authorize(roles.ADMIN),
+    validate(orderIdSchema),
+    deleteOrder,
+  );
 
 module.exports = router;
