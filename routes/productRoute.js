@@ -1,18 +1,51 @@
 const express = require("express");
-const router = express.Router();
+
+const productRouter = express.Router();
 
 const {
-    createProduct,
-    getAllProducts,
-    getProductById,
-    updateProduct,
-    deleteProduct,
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
 } = require("../services/productService");
 
-router.post("/", createProduct);
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+const validate = require("../middlewares/validation.middleware");
+const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
-module.exports = router;
+const {
+  createProductSchema,
+  productIdSchema,
+  updateProductSchema,
+} = require("../validations/product.validation");
+
+// Public routes
+productRouter.get("/", getAllProducts);
+productRouter.get("/:id", validate(productIdSchema), getProductById);
+
+// Admin restricted routes
+productRouter.post(
+  "/",
+  protect,
+  allowedTo("admin"),
+  validate(createProductSchema),
+  createProduct
+);
+
+productRouter.put(
+  "/:id",
+  protect,
+  allowedTo("admin"),
+  validate(updateProductSchema),
+  updateProduct
+);
+
+productRouter.delete(
+  "/:id",
+  protect,
+  allowedTo("admin"),
+  validate(productIdSchema),
+  deleteProduct
+);
+
+module.exports = productRouter;
