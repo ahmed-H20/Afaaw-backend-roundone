@@ -9,6 +9,9 @@ const userRepository = {
     },
     getUserByEmail: async (email) => {
         return await User.findOne({email});
+    },
+    getUserByEmailWithPassword: async (email) => {
+        return await User.findOne({email}).select("+password");
     }
 }
 

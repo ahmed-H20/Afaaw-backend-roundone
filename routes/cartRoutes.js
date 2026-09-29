@@ -8,7 +8,7 @@ router.get("/all", getAllCartsQueryValidation, getAllCarts);
 router.get("/:userId", getCart);
 
 
-router.post("/items/add", addCartItem);
+router.post("/items", addCartItem);
 router.delete("/items/:cartItemId", deleteCartItem);
 router.patch("/items/:cartItemId", updateCartItemValidation,updateCartItem )
 
