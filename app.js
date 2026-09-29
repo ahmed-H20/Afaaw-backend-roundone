@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
+  res.type("text/plain").send("Hello, World!");
 });
 
 app.use("/api", routes);

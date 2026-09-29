@@ -1,6 +1,13 @@
 // Review Service
 import { Review } from "../models/review.model.js";
+import Product from "../models/product.model.js";
 import AppError from "../errors/app-error.js";
+
+const ensureProductExists = async (productId) => {
+  if (productId && !(await Product.exists({ _id: productId }))) {
+    throw new AppError("Product not found", 404);
+  }
+};
 
 // @desc Get all reviews
 // @route GET /api/reviews
@@ -24,6 +31,7 @@ const getReviewById = async (id) => {
 // @route POST /api/reviews
 // @access User
 const createReview = async (reviewData) => {
+  await ensureProductExists(reviewData.productId);
   const review = new Review(reviewData);
   return review.save();
 };
@@ -32,8 +40,9 @@ const createReview = async (reviewData) => {
 // @route PATCH /api/reviews/:id
 // @access User
 const updateReview = async (id, reviewData) => {
+  await ensureProductExists(reviewData.productId);
   const review = await Review.findByIdAndUpdate(id, reviewData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   }).lean();
   if (!review) {

@@ -8,7 +8,7 @@ const getOrCreateCart = (userId) =>
 	Cart.findOneAndUpdate(
 		{ userId },
 		{ $setOnInsert: { userId } },
-		{ new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+		{ returnDocument: "after", upsert: true, runValidators: true, setDefaultsOnInsert: true },
 	).lean();
 
 const getCartContents = async (cart) => {
@@ -45,7 +45,7 @@ export const addItemToCart = async (userId, productId, quantity = 1) => {
 	await CartItem.findOneAndUpdate(
 		{ cartId: cart._id, productId },
 		{ $inc: { quantity } },
-		{ new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+		{ returnDocument: "after", upsert: true, runValidators: true, setDefaultsOnInsert: true },
 	);
 
 	return getCartContents(cart);

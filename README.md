@@ -1,22 +1,23 @@
 # E-commerce API
 
-A REST API built with Node.js, Express 5, MongoDB, and Mongoose. The project uses native ES modules, Zod request validation, and centralized error handling.
+A REST API built with Node.js, Express 5, MongoDB, and Mongoose. It uses native ES modules, Zod request validation, and centralized error handling.
 
 ## Requirements
 
 - Node.js 20 or newer
 - npm
-- MongoDB for local development and tests
+- A running MongoDB instance for local development and API tests
+- Postman (optional, for manual API testing)
 
-## Setup
+## Setup And Run
 
-Install dependencies:
+Install dependencies from the project directory:
 
 ```bash
 npm install
 ```
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env`, then set the database URLs:
 
 ```env
 PORT=5000
@@ -25,39 +26,68 @@ MONGODB_URL=mongodb://127.0.0.1:27017/ecommerce_api
 MONGODB_URL_TEST=mongodb://127.0.0.1:27017/ecommerce_api_test
 ```
 
-Keep `.env` out of version control. Use separate databases for development and tests.
+Keep `.env` out of version control. Use a separate test database because the API test suite drops its database after running.
 
-## Run
-
-Start the API:
+Start the server:
 
 ```bash
 npm start
 ```
 
-Start in watch mode:
+Start with automatic restarts while developing:
 
 ```bash
 npm run dev
 ```
 
-The server connects to MongoDB before listening. The default port is `5000`; set `PORT` to override it. `GET /` returns a simple health response.
+The server connects to MongoDB before listening. The default port is `5000`; set `PORT` to use another port. `GET http://localhost:5000/` is a plain-text health response. API routes are under `/api` and accept JSON with the `Content-Type: application/json` header.
 
-## API
+## Postman Quick Start
 
-All API routes are prefixed with `/api`. JSON request bodies should use `Content-Type: application/json`.
+1. Start MongoDB and run the API with `npm run dev`.
+2. In Postman, create an environment and set `baseUrl` to `http://localhost:5000/api`.
+3. Send requests to `{{baseUrl}}/...`; choose **Body > raw > JSON** for requests with a body.
+4. Create a category first, then use its returned `_id` when creating a product. Create a product before adding it to a cart or writing a review.
+5. Set `userId` to a valid MongoDB user ID for order and review examples. This API does not currently expose user registration or user CRUD routes, so use a user already in the database. Cart operations require a valid ObjectId format; cart creation does not check that the user document exists.
+6. Copy `_id` values from create responses into `categoryId`, `productId`, `orderId`, `reviewId`, and `cartItemId` as needed.
+
+There is no authentication middleware currently mounted on these routes. Do not expose the API publicly with real data until authentication and authorization are added.
+
+## API Routes
+
+All ID path parameters must be 24-character MongoDB ObjectId strings. `PATCH` bodies can contain one or more supported fields, but cannot be empty or include unknown fields.
+
+### Categories
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/categories` | List categories |
+| `GET` | `/categories/:id` | Get one category |
+| `POST` | `/categories` | Create a category (returns `201`) |
+| `PATCH` | `/categories/:id` | Update category fields |
+| `DELETE` | `/categories/:id` | Delete a category |
+
+Create body:
+
+```json
+{
+	"name": "Accessories"
+}
+```
+
+`name` is trimmed and must contain 1 to 120 characters.
 
 ### Products
 
 | Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/api/products` | List products |
-| `GET` | `/api/products/:id` | Get a product |
-| `POST` | `/api/products` | Create a product |
-| `PATCH` | `/api/products/:id` | Update product fields |
-| `DELETE` | `/api/products/:id` | Delete a product |
+| `GET` | `/products` | List products |
+| `GET` | `/products/:id` | Get one product |
+| `POST` | `/products` | Create a product (returns `201`) |
+| `PATCH` | `/products/:id` | Update product fields |
+| `DELETE` | `/products/:id` | Delete a product |
 
-Create-product fields:
+Create body (`category` is optional):
 
 ```json
 {
@@ -68,21 +98,59 @@ Create-product fields:
 }
 ```
 
-`name` must be a non-empty string, `price` a positive number, and `stock` a non-negative integer. `category` is optional and, when provided, must be a MongoDB ObjectId. Updates accept one or more of these fields.
+`name` is trimmed and must contain 1 to 120 characters, `price` must be a positive number, `stock` a non-negative integer, and `category` (when supplied) a MongoDB ObjectId.
+
+### Orders
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/orders` | List orders |
+| `GET` | `/orders/:id` | Get one order |
+| `POST` | `/orders` | Create an order (returns `201`) |
+| `PATCH` | `/orders/:id` | Update order fields |
+| `DELETE` | `/orders/:id` | Delete an order |
+
+Create body (status starts as `pending`):
+
+```json
+{
+	"userId": "507f1f77bcf86cd799439011",
+	"items": [
+		{
+			"productId": "507f1f77bcf86cd799439012",
+			"quantity": 2,
+			"color": "Black",
+			"size": "Full"
+		}
+	]
+}
+```
+
+`userId` must be a MongoDB ObjectId and `items` must contain at least one entry. Each entry requires a product ObjectId and positive integer quantity; `color` and `size` are optional. The API checks available stock, reserves the requested quantities, records each product's price as `unitPrice`, and stores the calculated `totalAmount` on the order. Order reads include `items` and `totalItems`.
+
+Update an order's status with `PATCH /orders/:id`:
+
+```json
+{
+	"status": "confirmed"
+}
+```
+
+Allowed transitions are `pending` to `confirmed` or `cancelled`, `confirmed` to `shipped` or `cancelled`, and `shipped` to `delivered`. Delivered and cancelled orders are terminal. Cancelling an unshipped order returns its reserved quantities to stock. Deleting an order is allowed only while pending or cancelled; deleting a pending order first restores its reserved stock and removes its line items.
 
 ### Reviews
 
 | Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/api/reviews` | List reviews |
-| `GET` | `/api/reviews/:id` | Get a review |
-| `POST` | `/api/reviews` | Create a review |
-| `PATCH` | `/api/reviews/:id` | Update review fields |
-| `DELETE` | `/api/reviews/:id` | Delete a review |
-| `GET` | `/api/reviews/product/:productId` | List reviews for a product |
-| `GET` | `/api/reviews/user/:userId` | List reviews by a user |
+| `GET` | `/reviews` | List reviews |
+| `GET` | `/reviews/:id` | Get one review |
+| `POST` | `/reviews` | Create a review (returns `201`) |
+| `PATCH` | `/reviews/:id` | Update review fields |
+| `DELETE` | `/reviews/:id` | Delete a review |
+| `GET` | `/reviews/product/:productId` | List reviews for a product |
+| `GET` | `/reviews/user/:userId` | List reviews by a user |
 
-Create-review fields:
+Create body:
 
 ```json
 {
@@ -93,35 +161,84 @@ Create-review fields:
 }
 ```
 
-`userId` and `productId` must be MongoDB ObjectIds, `rating` must be between 1 and 5, and `comment` is optional with a maximum length of 200 characters. Updates accept one or more review fields.
+Both IDs must be MongoDB ObjectIds, `rating` must be between 1 and 5, and the optional `comment` may contain up to 200 characters.
 
-## Validation and Errors
+### Carts
 
-Route validation uses the Zod schemas in `validations/`. Validated request values are available on `req.validated`, grouped by source (`body` or `params`). Controllers should use these parsed values rather than raw request input.
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/carts/:userId` | Get or create a user's cart |
+| `POST` | `/carts/:userId/items` | Add a product to the cart |
+| `PATCH` | `/carts/:userId/items/:itemId` | Set a cart item's quantity |
+| `DELETE` | `/carts/:userId/items/:itemId` | Remove one cart item |
+| `DELETE` | `/carts/:userId/items` | Remove all items from the cart |
 
-Errors pass to the global middleware in `middleware/error-handler.js`. The response format is:
+Add-item body (`quantity` is optional and defaults to `1`):
+
+```json
+{
+	"productId": "507f1f77bcf86cd799439012",
+	"quantity": 2
+}
+```
+
+Set-quantity body:
+
+```json
+{
+	"quantity": 3
+}
+```
+
+Quantities must be positive integers. The add-item route returns `404` if the product does not exist. Cart responses contain `cart`, `items`, `totalItems`, and `totalPrice`; each item includes its populated product summary.
+
+### Postman Request Examples
+
+Use the environment variable `baseUrl` defined above:
+
+| Action | Method and URL | Body |
+| --- | --- | --- |
+| Create category | `POST {{baseUrl}}/categories` | `{"name":"Accessories"}` |
+| Create product | `POST {{baseUrl}}/products` | `{"name":"Keyboard","price":1500,"stock":20,"category":"{{categoryId}}"}` |
+| Update product stock | `PATCH {{baseUrl}}/products/{{productId}}` | `{"stock":15}` |
+| Create order | `POST {{baseUrl}}/orders` | `{"userId":"{{userId}}","items":[{"productId":"{{productId}}","quantity":2}]}` |
+| Change order status | `PATCH {{baseUrl}}/orders/{{orderId}}` | `{"status":"confirmed"}` |
+| Create review | `POST {{baseUrl}}/reviews` | `{"userId":"{{userId}}","productId":"{{productId}}","rating":5,"comment":"Works as expected"}` |
+| Add cart item | `POST {{baseUrl}}/carts/{{userId}}/items` | `{"productId":"{{productId}}","quantity":2}` |
+| View cart | `GET {{baseUrl}}/carts/{{userId}}` | No body |
+
+For the other CRUD operations, use the corresponding route tables above. Use **Params** or replace `:id`, `:userId`, `:productId`, and `:itemId` with values returned by earlier requests.
+
+## Validation And Errors
+
+Routes validate request bodies and path parameters with the Zod schemas in `validations/`. The API returns `400` for invalid request data and `404` when a requested product, category, order, review, cart item, or cart product cannot be found.
+
+Example error response:
 
 ```json
 {
 	"success": false,
 	"message": "Request validation failed",
 	"details": [
-		{ "path": "price", "message": "Too small: expected number to be >0" }
+		{
+			"path": "price",
+			"message": "Too small: expected number to be >0"
+		}
 	]
 }
 ```
 
-`details` is included when available. Internal errors return status `500`; stack traces are included only outside production. Use `AppError` for expected application errors and let unexpected errors propagate to the global handler.
+`details` is present when available. Internal errors return status `500`; stack traces are included only outside production.
 
 ## Tests
 
-Set `MONGODB_URL_TEST` to a test-only MongoDB database, then run:
+Set `MONGODB_URL_TEST` in `.env` to a disposable test-only database, then run:
 
 ```bash
 npm test -- --runInBand
 ```
 
-The API test creates and removes product records and drops the test database after the suite. Do not point `MONGODB_URL_TEST` at a database containing data you need to keep.
+The current API test creates and removes product records, then drops the test database after the suite. Do not point `MONGODB_URL_TEST` at a database containing data you need to keep. This test suite is separate from manual Postman requests, which use `MONGODB_URL`.
 
 ## Project Structure
 
@@ -139,4 +256,4 @@ app.js        Express application configuration
 server.js     Environment loading, database connection, and startup
 ```
 
-Use explicit `.js` extensions for relative ES module imports. Keep HTTP concerns in controllers and routes, data operations in services, and request validation in the route schemas.
+Keep HTTP concerns in controllers and routes, data operations in services, and request validation in route schemas. Use explicit `.js` extensions for relative ES module imports.
