@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const validate = require("../middleware/validate");
+const { protect } = require("../middleware/auth");
 const {
     createCartValidation,
     cartIdValidation,
@@ -17,6 +18,7 @@ const {
     updateItem,
 } = require("../controllers/cartController");
 
+router.use(protect);
 router.post("/", createCartValidation, validate, createCart);
 router.post("/:cartId/items", cartIdValidation, addItemToCartValidation, validate, addItemToCart);
 router.get("/user/:userId", createCartValidation, validate, getCartByUserId);
