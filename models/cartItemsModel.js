@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const orderItemsSchema = new mongoose.Schema(
+const cartItemsSchema = new mongoose.Schema(
   {
     quantity: Number,
     color: String,
@@ -19,4 +19,5 @@ const orderItemsSchema = new mongoose.Schema(
   },
 );
 
-export const OrderItems = mongoose.model("OrderItems", orderItemsSchema);
+const CartItems = mongoose.model("CartItems", cartItemsSchema);
+module.exports = CartItems;
