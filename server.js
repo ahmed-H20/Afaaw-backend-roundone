@@ -10,6 +10,7 @@ const cartRoute = require("./routes/cartRoute");
 const cartItemRoute = require("./routes/cartItemRoute");
 const orderRoute = require("./routes/orderRoute");
 const orderItemRoute = require("./routes/orderItemRoute");
+const authRoute = require("./routes/authRoute");
 const ApiError = require("./utils/ApiError");
 const globalErrorHandler = require("./middlewares/globalErrorHandler");
 
@@ -35,7 +36,7 @@ const startServer = async () => {
     app.use("/api/v1/cart-items", cartItemRoute);
     app.use("/api/v1/orders", orderRoute);
     app.use("/api/v1/order-items", orderItemRoute);
-
+    app.use("/api/v1/auth", authRoute);
     // not found route, client error
     app.use((req, res, next) => {
       // const error = new Error(`Not Found - ${req.originalUrl}`);
