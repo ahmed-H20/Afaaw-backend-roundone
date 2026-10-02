@@ -14,7 +14,7 @@ const {
 const { protect, allowedTo } = require("../services/authService");
 
 router.post("/", createProductValidator, createProduct);
-router.get("/", protect, allowedTo("admin"), getAllProducts);
+router.get("/", protect, allowedTo("user"), getAllProducts);
 router.get("/:id", getProductById);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);

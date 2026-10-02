@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    passResetCode: String,
+    passResetCodeExpire: Date,
+    passResetCodeVerified: Boolean,
+    verifyPassExpire: Date,
+    changedPasswordAt: Date,
   },
   {
     timestamps: true,
@@ -49,7 +54,12 @@ const userSchema = new mongoose.Schema(
 
 // Hash Password by mongoose middleware
 userSchema.pre("save", async function () {
+  // If password is not modified, return
+  if (!this.isModified("password")) return;
+
   this.password = await bcrypt.hash(this.password, 12);
+
+  this.changedPasswordAt = Date.now() - 1000;
 });
 
 const User = mongoose.model("User", userSchema);

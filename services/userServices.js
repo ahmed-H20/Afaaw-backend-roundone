@@ -1,5 +1,7 @@
 const User = require("../models/userModels");
 const asyncHandler = require("express-async-handler");
+const bcrypt = require("bcrypt");
+const generateToken = require("../utils/generateToken");
 
 // @desc Create a new User
 // @route POST /api/Users
@@ -25,7 +27,7 @@ const getUserById = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ User });
+    res.status(200).json({ user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching User" });
@@ -66,10 +68,96 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+// @desc Get logged in User data
+// @route GET /api/users/me
+// @access Private protected
+const getLoggedUserData = async (req, res, next) => {
+  req.params.id = req.user._id;
+  next();
+};
+
+//@ desc update logged user data
+// @route PUT /api/users/updateMe
+// @access Private protected
+const updateLoggedUserData = async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      email: req.user.email,
+      name: req.body.name,
+      phone: req.body.phone,
+      address: req.body.address,
+    },
+    { new: true },
+  );
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.status(200).json({ message: "User updated successfully", user });
+};
+
+// @desc update logged user password
+// @route PUT /api/users/updateMyPassword
+// @access Private protected
+const updateLoggedUserPassword = async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+    },
+    { new: true },
+  );
+
+  if (!user) {
+    return next(new ApiError("Cannot find user with id ", 404));
+  }
+
+  const token = generateToken({ id: user._id });
+  res.status(200).json({
+    message: "Password updated successfully",
+    token,
+  });
+};
+
+const unActiveUser = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      active: false,
+    },
+    { new: true },
+  );
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  res.status(200).json({ message: "User deactivated successfully", user });
+};
+
+const activeUser = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      active: true,
+    },
+    { new: true },
+  );
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  res.status(200).json({ message: "User activated successfully", user });
+};
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
+  getLoggedUserData,
+  updateLoggedUserData,
+  updateLoggedUserPassword,
+  unActiveUser,
+  activeUser,
 };
