@@ -3,7 +3,10 @@ const {
   createProductValidator,
 } = require("../utils/Validations/productValidation");
 const router = express.Router();
-
+const {
+  uploadSingleImage,
+  resizeImage,
+} = require("../services/productService");
 const {
   createProduct,
   getAllProducts,
@@ -13,8 +16,14 @@ const {
 } = require("../services/productService");
 const { protect, allowedTo } = require("../services/authService");
 
-router.post("/", createProductValidator, createProduct);
-router.get("/", protect, allowedTo("user"), getAllProducts);
+router.post(
+  "/",
+  uploadSingleImage,
+  resizeImage,
+  createProductValidator,
+  createProduct,
+);
+router.get("/", getAllProducts);
 router.get("/:id", getProductById);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);

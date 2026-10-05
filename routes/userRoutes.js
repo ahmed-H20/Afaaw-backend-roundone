@@ -2,7 +2,7 @@ const express = require("express");
 const { createUserValidator } = require("../utils/Validations/UserValidation");
 const router = express.Router();
 const { protect } = require("../services/authService");
-
+const multer = require("multer");
 const {
   createUser,
   getAllUsers,
@@ -16,9 +16,16 @@ const {
   activeUser,
 } = require("../services/userServices");
 
+const upload = multer({ dest: "uploads/users" });
+
 router.use(protect);
 
-router.post("/", createUserValidator, createUser);
+router.post(
+  "/",
+  upload.single("profileImage"),
+  createUserValidator,
+  createUser,
+);
 router.get("/", getAllUsers);
 
 // loged user data

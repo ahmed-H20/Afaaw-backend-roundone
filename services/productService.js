@@ -1,6 +1,50 @@
 const Product = require("../models/productsModel");
 const asyncHandler = require("express-async-handler");
+const multer = require("multer");
+const sharp = require("sharp");
 
+// disc Storage
+// const Storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads/products");
+//   },
+//   filename: function (req, file, cb) {
+//     const extention = file.mimetype.split("/")[1];
+//     const fileName = `product-${Date.now()}.${extention}`;
+//     cb(null, fileName);
+//   },
+// });
+
+const resizeImage = async (req, res, next) => {
+  const FileName = `product-${Date.now()}.jpeg`;
+  await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`uploads/products/${FileName}`);
+
+  req.body.coverImage = FileName;
+
+  next();
+};
+
+const FilterImage = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
+
+const Storage = multer.memoryStorage();
+
+const upload = multer({
+  dest: "uploads/products",
+  storage: Storage,
+  fileFilter: FilterImage,
+});
+
+const uploadSingleImage = upload.single("coverImage");
 // @desc Create a new product
 // @route POST /api/products
 // @access Admin
@@ -72,4 +116,6 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
+  uploadSingleImage,
+  resizeImage,
 };

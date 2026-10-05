@@ -7,10 +7,12 @@ const ApiError = require("./utils/ApiError");
 const globalError = require("./middleware/GlobalErrorHandler");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const path = require("path");
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join("uploads")));
 
 const PORT = process.env.PORT || 3000;
 
