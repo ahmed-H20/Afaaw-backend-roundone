@@ -3,6 +3,10 @@ import { pathToFileURL } from "node:url";
 import app from "./app.js";
 import connectDB from "./config/database.js";
 
+// import crypto from "node:crypto";
+// const secretKey = crypto.randomBytes(64).toString("hex");
+// console.info("Generated Secret Key:", secretKey);
+
 export const startServer = async () => {
   await connectDB();
 

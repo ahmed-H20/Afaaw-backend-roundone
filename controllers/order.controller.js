@@ -1,7 +1,7 @@
 import * as orderService from "../services/order.service.js";
 
 const getAllOrders = async (req, res) => {
-	const orders = await orderService.getAllOrders();
+	const orders = await orderService.getAllOrders(req.auth.id, req.auth.role === "admin");
 	res.json(orders);
 };
 
@@ -11,7 +11,7 @@ const getOrderById = async (req, res) => {
 };
 
 const createOrder = async (req, res) => {
-	const order = await orderService.createOrder(req.validated.body);
+	const order = await orderService.createOrder({ ...req.validated.body, userId: req.auth.id });
 	res.status(201).json(order);
 };
 

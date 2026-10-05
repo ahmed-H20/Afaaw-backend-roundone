@@ -58,7 +58,10 @@ const attachItems = async (orders) => {
 	});
 };
 
-const getAllOrders = async () => attachItems(await Order.find().sort({ createdAt: -1 }).lean());
+const getAllOrders = async (userId, isAdmin = false) => {
+	const filter = isAdmin ? {} : { userId };
+	return attachItems(await Order.find(filter).sort({ createdAt: -1 }).lean());
+};
 
 const getOrderById = async (id) => {
 	const order = await Order.findById(id).lean();

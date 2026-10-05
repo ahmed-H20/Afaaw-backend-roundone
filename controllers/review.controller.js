@@ -11,17 +11,17 @@ const getReviewById = async (req, res) => {
 };
 
 const createReview = async (req, res) => {
-  const review = await reviewService.createReview(req.validated.body);
+  const review = await reviewService.createReview({ ...req.validated.body, userId: req.auth.id });
   res.status(201).json(review);
 };
 
 const updateReview = async (req, res) => {
-  const review = await reviewService.updateReview(req.validated.params.id, req.validated.body);
+  const review = await reviewService.updateReview(req.validated.params.id, req.validated.body, req.auth);
   res.json(review);
 };
 
 const deleteReview = async (req, res) => {
-  const review = await reviewService.deleteReview(req.validated.params.id);
+  const review = await reviewService.deleteReview(req.validated.params.id, req.auth);
   res.json({ message: "Review deleted successfully", review });
 };
 

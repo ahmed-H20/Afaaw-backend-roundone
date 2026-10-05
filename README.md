@@ -42,20 +42,62 @@ npm run dev
 
 The server connects to MongoDB before listening. The default port is `5000`; set `PORT` to use another port. `GET http://localhost:5000/` is a plain-text health response. API routes are under `/api` and accept JSON with the `Content-Type: application/json` header.
 
+### Email Utilities
+
+Reusable email helpers are exported from `utils/email.js`: `sendEmail`, `sendVerificationCode`, `sendPasswordResetCode`, `generateVerificationCode`, `createVerificationCode`, `hashVerificationCode`, and `verifyVerificationCode`. Configure SMTP in `.env` using `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, and optionally `SMTP_FROM`. Set `EMAIL_VERIFICATION_SECRET` to a random secret of at least 32 characters; keep it private and do not commit it.
+
+`createVerificationCode()` returns a six-digit code for immediate email delivery, an HMAC hash suitable for storing instead of the raw code, and a default ten-minute expiry. Persist the hash and expiry alongside the account/verification record, send the raw code with `sendVerificationCode({ to, code })`, and verify user input with `verifyVerificationCode({ code, codeHash, expiresAt })`. The authentication routes use these helpers, clear the stored code after successful verification, and rate-limit auth requests.
+
+
 ## Postman Quick Start
 
 1. Start MongoDB and run the API with `npm run dev`.
 2. In Postman, create an environment and set `baseUrl` to `http://localhost:5000/api`.
 3. Send requests to `{{baseUrl}}/...`; choose **Body > raw > JSON** for requests with a body.
 4. Create a category first, then use its returned `_id` when creating a product. Create a product before adding it to a cart or writing a review.
-5. Set `userId` to a valid MongoDB user ID for order and review examples. This API does not currently expose user registration or user CRUD routes, so use a user already in the database. Cart operations require a valid ObjectId format; cart creation does not check that the user document exists.
+5. Register and verify an account, then log in. Save `accessToken` from the login response as a Postman environment variable and add `Authorization: Bearer {{accessToken}}` to protected requests. Order/review ownership comes from the token; cart `userId` must match the authenticated account.
 6. Copy `_id` values from create responses into `categoryId`, `productId`, `orderId`, `reviewId`, and `cartItemId` as needed.
 
-There is no authentication middleware currently mounted on these routes. Do not expose the API publicly with real data until authentication and authorization are added.
+Protected routes require a verified active account. Product/category writes require an admin role; order access and cart access are owner-scoped; review writes are limited to the review owner or an admin. Public GET requests remain available for catalog and review reads. Bootstrap the first admin through a trusted database/seed process; public registration and admin-created accounts always receive the `user` role.
+
+### Authentication
+
+Authentication routes are prefixed with `/api/auth`:
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Create an unverified account and send a verification code |
+| `POST` | `/api/auth/verify-email` | Verify email with the six-digit code |
+| `POST` | `/api/auth/resend-verification` | Resend a code without revealing whether an account exists |
+| `POST` | `/api/auth/login` | Sign in and receive a short-lived JWT |
+| `GET` | `/api/auth/me` | Return the authenticated account |
+| `POST` | `/api/auth/forgot-password` | Request password reset instructions |
+| `POST` | `/api/auth/reset-password` | Set a new password using the emailed six-digit code |
+| `PATCH` | `/api/auth/change-password` | Change password while signed in |
+
+Registration body: `{"name":"Sam Example","email":"sam@example.com","password":"a-long-password-123"}`. Verification body: `{"email":"sam@example.com","code":"123456"}`. Login body: `{"email":"sam@example.com","password":"a-long-password-123"}`. Use the returned access token on the profile route as `Authorization: Bearer <accessToken>`.
+
+Request reset body: `{"email":"sam@example.com"}`. Complete reset body: `{"email":"sam@example.com","code":"123456","password":"a-new-long-password-456"}`. To change a password while signed in, send `PATCH /api/auth/change-password` with `{"currentPassword":"the-current-password","newPassword":"a-new-long-password-456"}` and the bearer token.
+
+Configure `JWT_SECRET` with a random secret of at least 32 bytes and set `JWT_EXPIRES_IN` (default `15m`). Password reset codes are six-digit values, stored only as HMAC hashes, expire after ten minutes, and are locked after five failed attempts. A successful reset or password change revokes existing access tokens. Passwords must be at least 8 characters and no more than 72 UTF-8 bytes. Password hashes and reset/verification secrets are excluded from normal model reads. Authentication endpoints are rate-limited. The default rate limiter uses in-memory storage; use a shared store when deploying multiple server instances.
 
 ## API Routes
 
 All ID path parameters must be 24-character MongoDB ObjectId strings. `PATCH` bodies can contain one or more supported fields, but cannot be empty or include unknown fields.
+
+### Users
+
+All user-management routes require an active admin bearer token. Admin-created accounts are regular, unverified users; they must complete email verification before sign-in. Role or active-status changes revoke that account's existing tokens. Deletion is a soft deactivation, preserving linked orders and reviews. An admin cannot remove their own access, and the last active admin cannot be demoted or deactivated.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/users?page=1&limit=20&role=user&active=true` | List users with pagination and optional filters |
+| `POST` | `/users` | Create a regular unverified user |
+| `GET` | `/users/:id` | Get one user |
+| `PATCH` | `/users/:id` | Change `role` and/or `active` |
+| `DELETE` | `/users/:id` | Deactivate a user |
+
+Create body: `{"name":"Sam Example","email":"sam@example.com","password":"a-long-password-123"}`. Update body: `{"role":"admin","active":true}`. The create endpoint does not accept a role; provision the first admin through a trusted seed/database process.
 
 ### Categories
 
@@ -114,7 +156,6 @@ Create body (status starts as `pending`):
 
 ```json
 {
-	"userId": "507f1f77bcf86cd799439011",
 	"items": [
 		{
 			"productId": "507f1f77bcf86cd799439012",
@@ -126,7 +167,7 @@ Create body (status starts as `pending`):
 }
 ```
 
-`userId` must be a MongoDB ObjectId and `items` must contain at least one entry. Each entry requires a product ObjectId and positive integer quantity; `color` and `size` are optional. The API checks available stock, reserves the requested quantities, records each product's price as `unitPrice`, and stores the calculated `totalAmount` on the order. Order reads include `items` and `totalItems`.
+`items` must contain at least one entry. Each entry requires a product ObjectId and positive integer quantity; `color` and `size` are optional. The authenticated account owns the order. The API checks stock, records purchase-time prices, stores the calculated total, and returns `items` and `totalItems`. Users can access their own orders; admins can access all orders.
 
 Update an order's status with `PATCH /orders/:id`:
 
@@ -154,14 +195,13 @@ Create body:
 
 ```json
 {
-	"userId": "507f1f77bcf86cd799439011",
 	"productId": "507f1f77bcf86cd799439012",
 	"rating": 5,
 	"comment": "Works as expected"
 }
 ```
 
-Both IDs must be MongoDB ObjectIds, `rating` must be between 1 and 5, and the optional `comment` may contain up to 200 characters.
+`productId` must be a MongoDB ObjectId, `rating` must be between 1 and 5, and the optional `comment` may contain up to 200 characters. The authenticated account is the review author; only that author or an admin can edit or delete it.
 
 ### Carts
 
@@ -190,7 +230,7 @@ Set-quantity body:
 }
 ```
 
-Quantities must be positive integers. The add-item route returns `404` if the product does not exist. Cart responses contain `cart`, `items`, `totalItems`, and `totalPrice`; each item includes its populated product summary.
+All cart routes require a bearer token. Users can access only their own cart unless they are admins. Quantities must be positive integers. The add-item route returns `404` if the product does not exist. Cart responses contain `cart`, `items`, `totalItems`, and `totalPrice`; each item includes its populated product summary.
 
 ### Postman Request Examples
 
@@ -201,9 +241,12 @@ Use the environment variable `baseUrl` defined above:
 | Create category | `POST {{baseUrl}}/categories` | `{"name":"Accessories"}` |
 | Create product | `POST {{baseUrl}}/products` | `{"name":"Keyboard","price":1500,"stock":20,"category":"{{categoryId}}"}` |
 | Update product stock | `PATCH {{baseUrl}}/products/{{productId}}` | `{"stock":15}` |
-| Create order | `POST {{baseUrl}}/orders` | `{"userId":"{{userId}}","items":[{"productId":"{{productId}}","quantity":2}]}` |
+| Request reset code | `POST {{baseUrl}}/auth/forgot-password` | `{"email":"sam@example.com"}` |
+| Reset password | `POST {{baseUrl}}/auth/reset-password` | `{"email":"sam@example.com","code":"123456","password":"a-new-long-password-456"}` |
+| Change password | `PATCH {{baseUrl}}/auth/change-password` | `{"currentPassword":"current-password","newPassword":"a-new-long-password-456"}` |
+| Create order | `POST {{baseUrl}}/orders` | `{"items":[{"productId":"{{productId}}","quantity":2}]}` |
 | Change order status | `PATCH {{baseUrl}}/orders/{{orderId}}` | `{"status":"confirmed"}` |
-| Create review | `POST {{baseUrl}}/reviews` | `{"userId":"{{userId}}","productId":"{{productId}}","rating":5,"comment":"Works as expected"}` |
+| Create review | `POST {{baseUrl}}/reviews` | `{"productId":"{{productId}}","rating":5,"comment":"Works as expected"}` |
 | Add cart item | `POST {{baseUrl}}/carts/{{userId}}/items` | `{"productId":"{{productId}}","quantity":2}` |
 | View cart | `GET {{baseUrl}}/carts/{{userId}}` | No body |
 
@@ -235,7 +278,7 @@ Example error response:
 Set `MONGODB_URL_TEST` in `.env` to a disposable test-only database, then run:
 
 ```bash
-npm test -- --runInBand
+npm test
 ```
 
 The current API test creates and removes product records, then drops the test database after the suite. Do not point `MONGODB_URL_TEST` at a database containing data you need to keep. This test suite is separate from manual Postman requests, which use `MONGODB_URL`.

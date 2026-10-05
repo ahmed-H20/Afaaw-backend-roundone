@@ -8,9 +8,15 @@ import { Categories } from "../../models/category.model.js";
 import { OrderItem } from "../../models/order-items.model.js";
 import Order from "../../models/order.model.js";
 import Product from "../../models/product.model.js";
+import User from "../../models/user.model.js";
+import jwt from "jsonwebtoken";
 
 let server;
 let baseURL;
+let adminUser;
+let adminToken;
+let regularUser;
+let regularUserToken;
 
 beforeAll(async () => {
   const testDatabaseUrl = process.env.MONGODB_URL_TEST;
@@ -24,6 +30,29 @@ beforeAll(async () => {
   }
 
   await mongoose.connect(testDatabaseUrl);
+  process.env.JWT_SECRET = "product-api-test-jwt-secret-with-at-least-32-bytes";
+  adminUser = await new User({
+    name: "API Test Admin",
+    email: "admin-product-test@example.com",
+    password: "a-strong-test-password-789",
+    verified: true,
+    role: "admin",
+  }).save();
+  adminToken = jwt.sign({ sub: String(adminUser._id), ver: 0 }, process.env.JWT_SECRET, {
+    algorithm: "HS256",
+    expiresIn: "1h",
+  });
+  regularUser = await new User({
+    name: "API Test User",
+    email: "user-product-test@example.com",
+    password: "a-strong-test-password-123",
+    verified: true,
+  }).save();
+  regularUserToken = jwt.sign({ sub: String(regularUser._id), ver: 0 }, process.env.JWT_SECRET, {
+    algorithm: "HS256",
+    expiresIn: "1h",
+  });
+  axios.defaults.headers.common.Authorization = `Bearer ${adminToken}`;
 
   server = app.listen(0);
 
@@ -53,6 +82,7 @@ afterAll(async () => {
       server.close(resolve);
     });
   }
+  delete axios.defaults.headers.common.Authorization;
 });
 
 describe("POST /api/products", () => {
@@ -81,6 +111,28 @@ describe("POST /api/products", () => {
   });
 });
 
+describe("authorization", () => {
+  it("requires authentication for writes and restricts carts to their owner", async () => {
+    const originalAuthorization = axios.defaults.headers.common.Authorization;
+    try {
+      delete axios.defaults.headers.common.Authorization;
+      await expect(
+        axios.post(`${baseURL}/api/products`, { name: "Keyboard", price: 1500, stock: 20 }),
+      ).rejects.toMatchObject({ response: { status: 401 } });
+
+      axios.defaults.headers.common.Authorization = `Bearer ${regularUserToken}`;
+      await expect(
+        axios.post(`${baseURL}/api/products`, { name: "Keyboard", price: 1500, stock: 20 }),
+      ).rejects.toMatchObject({ response: { status: 403 } });
+      await expect(axios.get(`${baseURL}/api/carts/${adminUser._id}`)).rejects.toMatchObject({
+        response: { status: 403 },
+      });
+    } finally {
+      axios.defaults.headers.common.Authorization = originalAuthorization;
+    }
+  });
+});
+
 describe("DELETE /api/categories/:id", () => {
   it("should reject deleting a category assigned to a product", async () => {
     const { data: category } = await axios.post(`${baseURL}/api/categories`, {
@@ -106,7 +158,7 @@ describe("DELETE /api/products/:id", () => {
       price: 1500,
       stock: 20,
     });
-    const userId = "507f1f77bcf86cd799439011";
+    const userId = String(adminUser._id);
 
     await axios.post(`${baseURL}/api/carts/${userId}/items`, {
       productId: product._id,
@@ -123,7 +175,6 @@ describe("POST /api/reviews", () => {
   it("should reject a review for a product that does not exist", async () => {
     await expect(
       axios.post(`${baseURL}/api/reviews`, {
-        userId: "507f1f77bcf86cd799439011",
         productId: "507f1f77bcf86cd799439012",
         rating: 5,
       }),
@@ -134,8 +185,6 @@ describe("POST /api/reviews", () => {
 });
 
 describe("Order lifecycle", () => {
-  const userId = "507f1f77bcf86cd799439011";
-
   it("creates order items with purchase-time prices, totals, and reserved stock", async () => {
     const { data: product } = await axios.post(`${baseURL}/api/products`, {
       name: "Keyboard",
@@ -144,7 +193,6 @@ describe("Order lifecycle", () => {
     });
 
     const { data: order } = await axios.post(`${baseURL}/api/orders`, {
-      userId,
       items: [
         { productId: product._id, quantity: 2, color: "Black", size: "Full" },
         { productId: product._id, quantity: 1 },
@@ -172,7 +220,6 @@ describe("Order lifecycle", () => {
 
     await expect(
       axios.post(`${baseURL}/api/orders`, {
-        userId,
         items: [{ productId: product._id, quantity: 3 }],
       }),
     ).rejects.toMatchObject({ response: { status: 409 } });
@@ -195,7 +242,6 @@ describe("Order lifecycle", () => {
 
     await expect(
       axios.post(`${baseURL}/api/orders`, {
-        userId,
         items: [
           { productId: firstProduct._id, quantity: 2 },
           { productId: secondProduct._id, quantity: 2 },
@@ -215,7 +261,6 @@ describe("Order lifecycle", () => {
       stock: 4,
     });
     const { data: order } = await axios.post(`${baseURL}/api/orders`, {
-      userId,
       items: [{ productId: product._id, quantity: 2 }],
     });
 
@@ -238,7 +283,6 @@ describe("Order lifecycle", () => {
       stock: 3,
     });
     const { data: order } = await axios.post(`${baseURL}/api/orders`, {
-      userId,
       items: [{ productId: product._id, quantity: 1 }],
     });
 
@@ -247,5 +291,22 @@ describe("Order lifecycle", () => {
     expect((await Product.findById(product._id)).stock).toBe(3);
     expect(await OrderItem.countDocuments({ orderId: order._id })).toBe(0);
     expect(await Order.exists({ _id: order._id })).toBeNull();
+  });
+
+  it("does not allow a user to access another user's order", async () => {
+    const { data: product } = await axios.post(`${baseURL}/api/products`, {
+      name: "Microphone",
+      price: 800,
+      stock: 2,
+    });
+    const { data: order } = await axios.post(`${baseURL}/api/orders`, {
+      items: [{ productId: product._id, quantity: 1 }],
+    });
+
+    axios.defaults.headers.common.Authorization = `Bearer ${regularUserToken}`;
+    await expect(axios.get(`${baseURL}/api/orders/${order._id}`)).rejects.toMatchObject({
+      response: { status: 403 },
+    });
+    axios.defaults.headers.common.Authorization = `Bearer ${adminToken}`;
   });
 });

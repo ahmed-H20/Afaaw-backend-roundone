@@ -39,8 +39,12 @@ const createReview = async (reviewData) => {
 // @desc Update a review
 // @route PATCH /api/reviews/:id
 // @access User
-const updateReview = async (id, reviewData) => {
-  await ensureProductExists(reviewData.productId);
+const updateReview = async (id, reviewData, auth) => {
+  const currentReview = await Review.findById(id).select("userId").lean();
+  if (!currentReview) throw new AppError("Review not found", 404);
+  if (auth.role !== "admin" && String(currentReview.userId) !== auth.id) {
+    throw new AppError("You are not allowed to update this review", 403);
+  }
   const review = await Review.findByIdAndUpdate(id, reviewData, {
     returnDocument: "after",
     runValidators: true,
@@ -54,7 +58,12 @@ const updateReview = async (id, reviewData) => {
 // @desc Delete a review
 // @route DELETE /api/reviews/:id
 // @access User
-const deleteReview = async (id) => {
+const deleteReview = async (id, auth) => {
+  const currentReview = await Review.findById(id).select("userId").lean();
+  if (!currentReview) throw new AppError("Review not found", 404);
+  if (auth.role !== "admin" && String(currentReview.userId) !== auth.id) {
+    throw new AppError("You are not allowed to delete this review", 403);
+  }
   const review = await Review.findByIdAndDelete(id).lean();
   if (!review) {
     throw new AppError("Review not found", 404);
