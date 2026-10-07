@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const validate = require("../middlewares/validate");
 const {
-  passwordResetLimiter,
+  forgotPasswordLimiter,
+  verifyOtpLimiter,
   loginLimiter,
 } = require("../middlewares/rateLimit");
 
@@ -29,14 +30,14 @@ router.post("/logout", logout);
 
 router.post(
   "/forgot-password",
-  passwordResetLimiter,
+  forgotPasswordLimiter,
   validate({ body: forgotPasswordSchema }),
   forgotPassword,
 );
 
 router.post(
   "/verify-otp",
-  passwordResetLimiter,
+  verifyOtpLimiter,
   validate({ body: verifyOtpSchema }),
   verifyOtp,
 );

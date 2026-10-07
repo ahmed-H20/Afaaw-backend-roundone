@@ -148,8 +148,10 @@ const resetPassword = async ({ resetToken, password }) => {
   user.passwordResetExpires = undefined;
   user.passwordResetAttempts = 0;
 
-  // Subtract a second - see the note below.
-  user.passwordChangedAt = Date.now() - 1000;
+  // No backdating needed: protect compares whole seconds on both sides, so a
+  // token signed in this same second still passes while anything older is
+  // revoked. Subtracting 1000 here would only widen that survival window.
+  user.passwordChangedAt = Date.now();
 
   await user.save(); // full validation here: it's a real password
 

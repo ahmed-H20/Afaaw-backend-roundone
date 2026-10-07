@@ -1,25 +1,27 @@
 const rateLimit = require("express-rate-limit");
 
-// Per-IP ceiling. The per-account attempt counter in verifyResetOtp is the
-// real defense; this stops someone cycling through many accounts.
-// express-rate-limit v7+ calls this `limit` (`max` is a deprecated alias).
-const passwordResetLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+const makeLimiter = ({ limit, message }) =>
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit,
+    message: { success: false, message },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+const forgotPasswordLimiter = makeLimiter({
   limit: 5,
-  message: { success: false, message: "Too many attempts, try again later" },
-  standardHeaders: true,
-  legacyHeaders: false,
+  message: "Too many reset requests, try again later",
 });
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+const verifyOtpLimiter = makeLimiter({
   limit: 10,
-  message: {
-    success: false,
-    message: "Too many login attempts, try again later",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
+  message: "Too many attempts, try again later",
 });
 
-module.exports = { passwordResetLimiter, loginLimiter };
+const loginLimiter = makeLimiter({
+  limit: 10,
+  message: "Too many login attempts, try again later",
+});
+
+module.exports = { forgotPasswordLimiter, verifyOtpLimiter, loginLimiter };
