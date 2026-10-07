@@ -30,6 +30,17 @@ const protect = async (req, res, next) => {
     return next(ApiError.unauthorized("This account no longer exists"));
   }
 
+  if (user.passwordChangedAt) {
+    const changedAtSec = Math.floor(user.passwordChangedAt.getTime() / 1000);
+    if (payload.iat < changedAtSec) {
+      return next(
+        ApiError.unauthorized(
+          "Password was changed recently, please log in again",
+        ),
+      );
+    }
+  }
+
   req.user = user;
   next();
 };

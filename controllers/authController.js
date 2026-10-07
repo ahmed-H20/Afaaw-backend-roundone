@@ -44,4 +44,37 @@ const logout = async (req, res) => {
   res.status(200).json({ message: "Logged out" });
 };
 
-module.exports = { register, login, logout };
+// @route POST /api/v1/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  await authService.forgotPassword(req.validated.body);
+
+  // Identical response whether or not the account exists.
+  res.status(200).json({
+    message: "If an account exists for that email, a reset code has been sent",
+  });
+};
+
+// @route POST /api/v1/auth/verify-otp
+const verifyOtp = async (req, res) => {
+  const { resetToken } = await authService.verifyResetOtp(req.validated.body);
+  res.status(200).json({ message: "Code verified", resetToken });
+};
+
+// @route POST /api/v1/auth/reset-password
+const resetPassword = async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.resetPassword(
+    req.validated.body,
+  );
+
+  res.cookie("jwt", refreshToken, cookieOptions);
+  res.status(200).json({ message: "Password reset", user, accessToken });
+};
+
+module.exports = {
+  register,
+  login,
+  logout,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+};

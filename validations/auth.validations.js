@@ -14,4 +14,30 @@ const loginSchema = z.strictObject({
   password: z.string().min(1, "Password is required"),
 });
 
-module.exports = { registerSchema, loginSchema };
+const forgotPasswordSchema = z.strictObject({
+  email: z.email("Enter a valid email").trim().toLowerCase(),
+});
+
+const verifyOtpSchema = z.strictObject({
+  email: z.email("Enter a valid email").trim().toLowerCase(),
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
+
+const resetPasswordSchema = z.strictObject({
+  resetToken: z.string().regex(/^[a-f0-9]{64}$/, "Invalid reset token"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128),
+});
+
+module.exports = {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  verifyOtpSchema,
+  resetPasswordSchema,
+};

@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/db");
+const { verifyMailConnection } = require("./config/mail");
 const app = require("./app");
 
 const PORT = process.env.PORT || 3000;
@@ -10,6 +11,10 @@ const startServer = async () => {
   try {
     // Only start accepting requests once the database is actually connected.
     await connectDB();
+
+    await verifyMailConnection().catch((error) =>
+      console.warn("Mail transporter unavailable:", error.message),
+    );
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
